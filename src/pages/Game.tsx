@@ -1,72 +1,80 @@
-import React, { useEffect, useState, useCallback } from 'react'
-import Board from '../components/Board/Board'
-import { ObjectType, TerrainType, MoveDirection } from '../types/GameTypes'
+import React, { useEffect, useState } from 'react';
+import Board from '../components/Board/Board';
+import { ObjectType, TerrainType } from '../types/GameTypes';
 
 const Game: React.FC = () => {
-  const [terrain, setTerrain] = useState<TerrainType[][]>([])
-  const [objects, setObjects] = useState<ObjectType[][]>([])
-  const sessionId = 'b088cd0e-0b4a-4576-8d55-a2c733a4009b' // TODO: Tornar dinâmico depois
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [terrain, setTerrain] = useState<TerrainType[][]>([]);
+  const [objects, setObjects] = useState<ObjectType[][]>([]);
 
-  // Carrega os dados da fase do backend
+  // 🔹 Obtém a última sessão ativa do backend
   useEffect(() => {
-    fetch(`http://localhost:8080/sessions/${sessionId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setTerrain(data.terrain)
-        setObjects(data.objects)
-      })
-      .catch((error) => console.error('Erro ao carregar a fase:', error))
-  }, [sessionId])
-
-  // Função para movimentar o jogador
-  const movePlayer = useCallback(
-    async (direction: MoveDirection) => {
-      try {
-        const response = await fetch(`http://localhost:8080/moves`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId, direction }),
-        })
-
-        if (!response.ok) {
-          throw new Error('Erro ao mover o jogador')
+    fetch(`http://localhost:8080/sessions`)
+      .then(response => response.json())
+      .then(sessions => {
+        if (sessions.length > 0) {
+          setSessionId(sessions[sessions.length - 1].sessionId); // Pega a última sessão
+        } else {
+          console.error('Nenhuma sessão encontrada.');
         }
+      })
+      .catch(error => console.error('Erro ao buscar sessão:', error));
+  }, []);
 
-        const data = await response.json()
-        setObjects(data.objects)
-      } catch (error) {
-        console.error('Erro ao mover:', error)
-      }
-    },
-    [sessionId],
-  )
-
-  // Captura os eventos do teclado
+  // 🔹 Carrega os dados da fase da sessão
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const keyMap: Record<string, MoveDirection> = {
-        ArrowUp: 'UP',
-        ArrowDown: 'DOWN',
-        ArrowLeft: 'LEFT',
-        ArrowRight: 'RIGHT',
-      }
+    if (!sessionId) return;
 
-      const direction = keyMap[event.key]
+    fetch(`http://localhost:8080/sessions/${sessionId}`)
+      .then(response => response.json())
+      .then(data => {
+        setTerrain(data.terrain);
+        setObjects(data.objects);
+      })
+      .catch(error => console.error('Erro ao carregar a fase:', error));
+  }, [sessionId]);
+
+  // 🔹 Captura eventos do teclado e envia o comando de movimentação
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const handleKeyDown = async (event: KeyboardEvent) => {
+      let direction: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' | null = null;
+      if (event.key === 'ArrowUp') direction = 'UP';
+      if (event.key === 'ArrowDown') direction = 'DOWN';
+      if (event.key === 'ArrowLeft') direction = 'LEFT';
+      if (event.key === 'ArrowRight') direction = 'RIGHT';
+
       if (direction) {
-        movePlayer(direction)
-      }
-    }
+        try {
+          const response = await fetch(`http://localhost:8080/moves`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, direction }),
+          });
 
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [movePlayer])
+          if (!response.ok) {
+            throw new Error('Erro ao mover o jogador');
+          }
+
+          const data = await response.json();
+          setObjects(data.objects); // 🔹 Atualiza apenas os objetos
+        } catch (error) {
+          console.error('Erro ao mover:', error);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [sessionId]);
 
   return (
     <div>
       <h1>Sokobox</h1>
       <Board terrain={terrain} objects={objects} />
     </div>
-  )
-}
+  );
+};
 
-export default Game
+export default Game;

@@ -20,7 +20,6 @@ const Tile: React.FC<TileProps> = ({ terrain, object }) => {
     NONE: '',
     PLAYER: '🧍',
     BOX: '📦',
-    BOX_ON_DEST: '✅',
   }
 
   return <div className={terrainStyles[terrain]}>{objectIcons[object]}</div>

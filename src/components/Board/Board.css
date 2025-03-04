@@ -12,14 +12,14 @@
   .cell {
     width: 50px;
     height: 50px;
-    position: relative; /* Permite sobreposição de elementos */
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 1px solid #ccc;
   }
   
-  /* 🔹 Camada do terreno (sempre fixa no fundo) */
+  /* 🔹 Terreno sempre fixo no fundo */
   .cell-terrain {
     position: absolute;
     width: 100%;
@@ -29,10 +29,10 @@
     justify-content: center;
     font-size: 24px;
     font-weight: bold;
-    z-index: 1; /* Mantém o terreno no fundo */
+    z-index: 1; /* Sempre por baixo dos objetos */
   }
   
-  /* 🔹 Camada do objeto (flutua sobre o terreno) */
+  /* 🔹 Objetos animados */
   .cell-object {
     position: absolute;
     width: 100%;
@@ -42,21 +42,16 @@
     justify-content: center;
     font-size: 24px;
     font-weight: bold;
-    z-index: 2; /* Mantém os objetos sobre o terreno */
+    transition: transform 0.2s ease-out;
+    background-color: transparent; /* Remove fundo sólido */
   }
   
   /* 🔹 Estilos para o terreno */
-  .terrain-wall { background-color: #555; } /* Cinza escuro */
-  .terrain-floor { background-color: #ddd; } /* Cinza claro */
-  .terrain-destination { background-color: #ddd; } /* Mesmo fundo que o chão */
+  .terrain-wall { background-color: #555; }
+  .terrain-floor, .terrain-destination { background-color: #ddd; }
   
   /* 🔹 Estilos para os objetos */
-  .object-player { color: blue; background: none; } /* Jogador azul sem fundo */
-  .object-box { color: brown; background: none; } /* Caixa marrom sem fundo */
-  
-  /* 🔹 Ajuste para caixas no destino */
-  .object-box.terrain-destination {
-    color: green; /* Caixa no destino fica verde */
-    background: none; /* Sem fundo para não cobrir o ❌ */
-  }
+  .object-player { color: blue; z-index: 3; }
+  .object-box { color: brown; z-index: 2; }
+  .object-box.terrain-destination { color: green; z-index: 2; } /* Mantém a caixa visível no destino */
   

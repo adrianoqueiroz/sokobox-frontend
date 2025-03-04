@@ -1,13 +1,14 @@
 import React from 'react';
-import { ObjectType, TerrainType } from '../../types/GameTypes';
+import { ObjectType, TerrainType, MovedObject } from '../../types/GameTypes';
 import './Board.css';
 
 interface BoardProps {
   terrain: TerrainType[][];
   objects: ObjectType[][];
+  animatingObjects?: MovedObject[];
 }
 
-const Board: React.FC<BoardProps> = ({ terrain, objects }) => {
+const Board: React.FC<BoardProps> = ({ terrain, objects, animatingObjects = [] }) => {
   return (
     <div className="board">
       {terrain.map((row, rowIndex) => (
@@ -15,16 +16,30 @@ const Board: React.FC<BoardProps> = ({ terrain, objects }) => {
           {row.map((terrainType, colIndex) => {
             const objectType = objects[rowIndex]?.[colIndex] || 'NONE';
 
+            // 🔹 Encontrar se este objeto está na animação
+            const movingObject = animatingObjects.find(
+              (m) => m.toRow === rowIndex && m.toCol === colIndex
+            );
+
             return (
               <div key={colIndex} className="cell">
-                {/* 🔹 Camada do terreno (sempre no fundo) */}
+                {/* 🔹 Camada do terreno */}
                 <div className={`cell-terrain terrain-${terrainType.toLowerCase()}`}>
-                  {terrainType === 'DESTINATION' && '❌'}
+                  {terrainType === 'DESTINATION' ? '❌' : ''}
                 </div>
 
-                {/* 🔹 Camada do objeto (sobrepõe o terreno) */}
+                {/* 🔹 Camada dos objetos (animados apenas se necessário) */}
                 {objectType !== 'NONE' && (
-                  <div className={`cell-object object-${objectType.toLowerCase()}`}>
+                  <div
+                    className={`cell-object object-${objectType.toLowerCase()}`}
+                    style={{
+                      transform: movingObject
+                        ? `translate(${(movingObject.fromCol - movingObject.toCol) * 50}px, ${(movingObject.fromRow - movingObject.toRow) * 50}px)`
+                        : 'translate(0, 0)',
+                      transition: movingObject ? 'transform 0.2s ease-out' : 'none',
+                      zIndex: objectType === 'BOX' ? 2 : 3, // Jogador sobre a caixa
+                    }}
+                  >
                     {getObjectSymbol(objectType)}
                   </div>
                 )}
@@ -39,9 +54,9 @@ const Board: React.FC<BoardProps> = ({ terrain, objects }) => {
 
 // 🔹 Função para definir os símbolos dos objetos
 const getObjectSymbol = (objectType: ObjectType) => {
-  if (objectType === 'PLAYER') return '🧍'; // Jogador
-  if (objectType === 'BOX') return '📦'; // Caixa
-  return ''; // Nenhum objeto
+  if (objectType === 'PLAYER') return '🧍';
+  if (objectType === 'BOX') return '📦';
+  return '';
 };
 
 export default Board;
