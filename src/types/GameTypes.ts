@@ -1,6 +1,26 @@
-export type TerrainType = 'WALL' | 'FLOOR' | 'DESTINATION';
-export type ObjectType = 'NONE' | 'PLAYER' | 'BOX';
+// Definição dos tipos de terreno
+export enum TerrainType {
+  WALL = 'WALL',
+  FLOOR = 'FLOOR',
+  DESTINATION = 'DESTINATION',
+}
 
+// Definição dos tipos de objetos
+export enum ObjectType {
+  NONE = 'NONE',
+  PLAYER = 'PLAYER',
+  BOX = 'BOX',
+}
+
+// Direções de movimento
+export enum MoveDirection {
+  UP = 'UP',
+  DOWN = 'DOWN',
+  LEFT = 'LEFT',
+  RIGHT = 'RIGHT',
+}
+
+// Estrutura para representar um objeto movido
 export interface MovedObject {
   type: ObjectType;
   fromRow: number;
@@ -9,7 +29,8 @@ export interface MovedObject {
   toCol: number;
 }
 
+// Estrutura do movimento realizado
 export interface MoveRecord {
-  direction: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
+  direction: MoveDirection;
   movedObjects: MovedObject[];
 }
