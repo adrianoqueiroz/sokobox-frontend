@@ -1,0 +1,62 @@
+.board {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .board-row {
+    display: flex;
+  }
+  
+  .cell {
+    width: 50px;
+    height: 50px;
+    position: relative; /* Permite sobreposição de elementos */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+  }
+  
+  /* 🔹 Camada do terreno (sempre fixa no fundo) */
+  .cell-terrain {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 1; /* Mantém o terreno no fundo */
+  }
+  
+  /* 🔹 Camada do objeto (flutua sobre o terreno) */
+  .cell-object {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 2; /* Mantém os objetos sobre o terreno */
+  }
+  
+  /* 🔹 Estilos para o terreno */
+  .terrain-wall { background-color: #555; } /* Cinza escuro */
+  .terrain-floor { background-color: #ddd; } /* Cinza claro */
+  .terrain-destination { background-color: #ddd; } /* Mesmo fundo que o chão */
+  
+  /* 🔹 Estilos para os objetos */
+  .object-player { color: blue; background: none; } /* Jogador azul sem fundo */
+  .object-box { color: brown; background: none; } /* Caixa marrom sem fundo */
+  
+  /* 🔹 Ajuste para caixas no destino */
+  .object-box.terrain-destination {
+    color: green; /* Caixa no destino fica verde */
+    background: none; /* Sem fundo para não cobrir o ❌ */
+  }
+  
