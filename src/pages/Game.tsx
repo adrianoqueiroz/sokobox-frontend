@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import Board from '../components/Board/Board';
-import { ObjectType, TerrainType } from '../types/GameTypes';
+import { ObjectType, TerrainType, MoveRecord, MovedObject } from '../types/GameTypes';
 
 const Game: React.FC = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [terrain, setTerrain] = useState<TerrainType[][]>([]);
   const [objects, setObjects] = useState<ObjectType[][]>([]);
+  const [animatingObjects, setAnimatingObjects] = useState<MovedObject[]>([]);
 
-  // 🔹 Obtém a última sessão ativa do backend
+  // 🔹 Obtém a última sessão ativa
   useEffect(() => {
     fetch(`http://localhost:8080/sessions`)
       .then(response => response.json())
       .then(sessions => {
         if (sessions.length > 0) {
-          setSessionId(sessions[sessions.length - 1].sessionId); // Pega a última sessão
+          setSessionId(sessions[sessions.length - 1].sessionId);
         } else {
           console.error('Nenhuma sessão encontrada.');
         }
@@ -21,7 +22,7 @@ const Game: React.FC = () => {
       .catch(error => console.error('Erro ao buscar sessão:', error));
   }, []);
 
-  // 🔹 Carrega os dados da fase da sessão
+  // 🔹 Carrega os dados da sessão
   useEffect(() => {
     if (!sessionId) return;
 
@@ -58,7 +59,18 @@ const Game: React.FC = () => {
           }
 
           const data = await response.json();
-          setObjects(data.objects); // 🔹 Atualiza apenas os objetos
+
+          // 🔥 Pegamos apenas os objetos movimentados na ÚLTIMA jogada
+          const lastMove: MoveRecord | undefined = data.moves[data.moves.length - 1];
+          if (lastMove) {
+            setAnimatingObjects(lastMove.movedObjects);
+          }
+
+          // 🔄 Pequeno delay antes de atualizar os objetos para permitir a animação
+          setTimeout(() => {
+            setObjects(data.objects);
+            setAnimatingObjects([]); // 🔄 Remove a animação após a atualização real
+          }, 200);
         } catch (error) {
           console.error('Erro ao mover:', error);
         }
@@ -72,7 +84,7 @@ const Game: React.FC = () => {
   return (
     <div>
       <h1>Sokobox</h1>
-      <Board terrain={terrain} objects={objects} />
+      <Board terrain={terrain} objects={objects} animatingObjects={animatingObjects} />
     </div>
   );
 };
