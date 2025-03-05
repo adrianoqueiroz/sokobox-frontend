@@ -126,6 +126,7 @@ const Game: React.FC = () => {
           animatingObjects={animatingObjects}
         />
       )}
+
     </div>
   )
 }

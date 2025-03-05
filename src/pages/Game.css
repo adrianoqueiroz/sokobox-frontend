@@ -1,0 +1,22 @@
+.game-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    background-image: url('/assets/background.png');
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .game-content {
+    text-align: center;
+    flex-grow: 1;
+  }
+  
+  .game-title {
+    font-size: 32px;
+    color: white;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+    margin-bottom: 10px;
+  }
+  

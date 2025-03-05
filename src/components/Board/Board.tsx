@@ -38,18 +38,19 @@ const Board: React.FC<BoardProps> = ({
                   {terrainType === 'DESTINATION' ? '❌' : ''}
                 </div>
 
-                {/* 🔹 Camada do objeto (com animação) */}
+                {/* 🔹 Renderiza qualquer objeto que não seja NONE */}
                 {objectType !== 'NONE' && (
                   <div
-                    className={`cell-object object-${objectType.toLowerCase()}`}
+                    className={`cell-object object-${objectType.toLowerCase()} ${
+                      objectType === 'BOX' && isBoxOnDestination && !movingObject
+                        ? 'destination-active'
+                        : ''
+                    }`}
                     style={{
                       transform: movingObject
                         ? `translate(${(movingObject.toCol - movingObject.fromCol) * 50}px, ${(movingObject.toRow - movingObject.fromRow) * 50}px)`
                         : 'translate(0, 0)',
-                      transition: movingObject
-                        ? 'transform 0.2s ease-out'
-                        : 'none',
-                      zIndex: objectType === 'PLAYER' ? 3 : 2, // Jogador sobre a caixa
+                      transition: movingObject ? 'transform 0.2s ease-out' : 'none',
                     }}
                   >
                     {getObjectSymbol(objectType)}
@@ -67,7 +68,6 @@ const Board: React.FC<BoardProps> = ({
 // 🔹 Função para definir os símbolos dos objetos
 const getObjectSymbol = (objectType: ObjectType) => {
   if (objectType === 'PLAYER') return '🧍' // Jogador
-  if (objectType === 'BOX') return '📦' // Caixa
   return '' // Nenhum objeto
 }
 

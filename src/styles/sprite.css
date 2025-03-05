@@ -1,0 +1,31 @@
+.sprite {
+    width: 50px; /* Mantemos o tamanho do tile */
+    height: 50px;
+    background-image: url('/assets/skins.bmp'); /* Acessando a spritesheet */
+    background-size: 240px 400px; /* Tamanho total da imagem */
+  }
+  
+  /* 🔹 Jogador */
+  .sprite-player-down { background-position: 0px 0px; }
+  .sprite-player-down-walk1 { background-position: -30px 0px; }
+  .sprite-player-down-walk2 { background-position: -60px 0px; }
+  
+  .sprite-player-up { background-position: -90px 0px; }
+  .sprite-player-up-walk1 { background-position: -120px 0px; }
+  .sprite-player-up-walk2 { background-position: -150px 0px; }
+  
+  .sprite-player-right { background-position: -180px 0px; }
+  .sprite-player-right-walk { background-position: -210px 0px; }
+  
+  .sprite-player-left { background-position: 0px -30px; }
+  .sprite-player-left-walk { background-position: -30px -30px; }
+  
+  /* 🔹 Objetos */
+  .sprite-box { background-position: 0px -60px; }
+  .sprite-destination { background-position: -90px -60px; }
+  .sprite-destination-box { background-position: -30px -60px; }
+  
+  /* 🔹 Terreno */
+  .sprite-floor { background-position: -60px -60px; }
+  .sprite-wall { background-position: -120px -60px; }
+  

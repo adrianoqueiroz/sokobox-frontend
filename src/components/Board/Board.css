@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #ccc;
+  /* border: 1px solid #ccc; */
 }
 
 /* 🔹 Terreno sempre fixo no fundo */
@@ -46,17 +46,50 @@
   background-color: transparent; /* Remove fundo sólido */
 }
 
+/* 🔹 Estilos para a Caixa */
+.object-box {
+  width: 100%;
+  height: 100%;
+  background-image: url('/assets/box.png'); /* Substitua pelo caminho correto */
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
 
-/* ✅ DESTINATION quando tem uma caixa sobre ele */
-.destination-active {
-  background-color: #a0f0a0 !important; /* Fundo verde claro */
-  border: 3px solid green;
-  border-radius: 5px;
+.object-box.destination-active {
+  outline: 3px solid purple; /* ✅ Adiciona uma borda externa sem reduzir a caixa */
+  border-radius: 3px; /* 🔹 Mantém um visual arredondado, opcional */
 }
 
 /* 🔹 Estilos para o terreno */
-.terrain-wall { background-color: #555; }
-.terrain-floor, .terrain-destination { background-color: #ddd; }
+.terrain-wall {
+  background-image: url('/assets/wall2.png'); /* Caminho da imagem */
+  background-size: cover; /* Garante que a imagem ocupe todo o espaço */
+  background-position: center;
+}
+
+.terrain-floor, .terrain-destination { 
+  background-image: url('/assets/floor.png'); /* Caminho da imagem */
+  background-size: cover; /* Garante que a imagem ocupe todo o espaço */
+  background-position: center;
+
+  box-shadow: 0px 0px 0px 1px black; /* ✅ Cria um efeito de borda sobre a caixa */
+  border-radius: 1px;
+}
+
+
+/* 🔹 Animação para o destino */
+@keyframes glow {
+  0% { box-shadow: 0 0 5px cyan; }
+  50% { box-shadow: 0 0 15px cyan; }
+  100% { box-shadow: 0 0 5px cyan; }
+}
+
+.object-box.destination-active {
+  outline: 1px solid green; /* ✅ Adiciona uma borda externa sem reduzir a caixa */
+  border-radius: 5px; /* 🔹 Mantém um visual arredondado, opcional */
+  animation: glow 1s infinite alternate;
+}
 
 /* 🔹 Estilos para os objetos */
 .object-player { color: blue; z-index: 3; }
