@@ -1,22 +1,50 @@
-.game-container {
+/* 🔹 Mantém o wrapper do jogo e a sidebar como dois blocos separados */
+.game-wrapper {
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
     height: 100vh;
     background-image: url('/assets/background.png');
     background-size: cover;
     background-position: center;
-  }
-  
-  .game-content {
-    text-align: center;
-    flex-grow: 1;
-  }
-  
-  .game-title {
-    font-size: 32px;
-    color: white;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
-    margin-bottom: 10px;
-  }
-  
+}
+
+/* 🔹 Área onde o board fica */
+.game-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(100vw - 250px); /* 🔹 Tira a largura da sidebar */
+    height: 100vh;
+    overflow: hidden; /* 🔹 Evita que o board ultrapasse a área disponível */
+}
+
+/* 🔹 Mantém o wrapper do jogo e a sidebar como dois blocos separados */
+.game-wrapper {
+    display: flex;
+    height: 100vh;
+    background-image: url('/assets/background.png');
+    background-size: cover;
+    background-position: center;
+}
+
+/* 🔹 Área onde o board fica */
+.game-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(100vw - 250px); /* 🔹 Tira a largura da sidebar */
+    height: 100vh;
+    overflow: hidden; /* 🔹 Evita que o board ultrapasse a área disponível */
+}
+
+/* 🔹 Mantém o board centralizado, mas agora com um tamanho máximo */
+.game-board {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    max-width: 90%; /* 🔹 Evita que fique muito largo */
+    max-height: 90vh; /* 🔹 Evita que ultrapasse a tela */
+    overflow: auto; /* 🔹 Se necessário, adiciona rolagem para evitar que sobreponha a sidebar */
+}
+

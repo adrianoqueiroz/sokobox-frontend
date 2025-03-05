@@ -2,23 +2,26 @@ import React from 'react';
 import './Sidebar.css';
 
 interface SidebarProps {
-  elapsedTime: number;
-  moveCount: number;
-  bestScore: number | null;
-  onRestart: () => void;
+  movesCount: number;
+  timeElapsed: number; // ✅ Tempo já é recebido como prop
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ elapsedTime, moveCount, bestScore, onRestart }) => {
-  return (
-    <div className="sidebar">
-      <h2>📊 Estatísticas</h2>
-      <p>⏳ Tempo: {elapsedTime}s</p>
-      <p>🚶 Movimentos: {moveCount}</p>
-      <p>🏆 Melhor: {bestScore !== null ? bestScore : '-'}</p>
+const Sidebar: React.FC<SidebarProps> = ({ movesCount, timeElapsed }) => {
+  // ✅ Formata o tempo para mm:ss
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
-      <button onClick={onRestart}>🔄 Reiniciar</button>
-      <button disabled={true}>▶️ Mostrar Replay</button>
-      <button disabled={true}>🏠 Voltar ao Menu</button>
+  return (
+    <div className="game-sidebar">
+      <h1>SokoBox</h1>
+
+      <h2>Estatísticas</h2>
+      <p>🔄 Movimentos: {movesCount}</p>
+      <p>⏳ Tempo: {formatTime(timeElapsed)}</p> {/* ✅ Mostra o tempo formatado */}
+      <button className="replay-button">📺 Ver Replay</button>
     </div>
   );
 };
