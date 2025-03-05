@@ -3,10 +3,11 @@ import './Sidebar.css';
 
 interface SidebarProps {
   movesCount: number;
-  timeElapsed: number; // ✅ Tempo já é recebido como prop
+  timeElapsed: number;
+  onRestart: () => void; // ✅ Função de reinício como prop
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ movesCount, timeElapsed }) => {
+const Sidebar: React.FC<SidebarProps> = ({ movesCount, timeElapsed, onRestart }) => {
   // ✅ Formata o tempo para mm:ss
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -20,7 +21,12 @@ const Sidebar: React.FC<SidebarProps> = ({ movesCount, timeElapsed }) => {
 
       <h2>Estatísticas</h2>
       <p>🔄 Movimentos: {movesCount}</p>
-      <p>⏳ Tempo: {formatTime(timeElapsed)}</p> {/* ✅ Mostra o tempo formatado */}
+      <p>⏳ Tempo: {formatTime(timeElapsed)}</p>
+
+      {/* 🔄 Botão de Reiniciar */}
+      <button className="restart-button" onClick={onRestart}>🔄 Reiniciar</button>
+
+      {/* 📺 Replay */}
       <button className="replay-button">📺 Ver Replay</button>
     </div>
   );

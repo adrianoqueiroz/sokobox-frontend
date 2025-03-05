@@ -54,7 +54,35 @@ const Game: React.FC = () => {
         setIsLoading(false);
       });
   }, []);
+
+  const handleRestart = async () => {
+    if (!sessionId) return;
   
+    try {
+      const response = await fetch(`http://localhost:8080/sessions/${sessionId}/restart`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+      });
+  
+      if (!response.ok) {
+        throw new Error('Erro ao reiniciar a sessão');
+      }
+  
+      const data = await response.json();
+  
+      // 🔄 Atualiza os estados sem trocar de sessão
+      setTerrain(data.terrain);
+      setObjects(data.objects);
+      setMovesCount(0);
+      setTimeElapsed(0);
+  
+      // ✅ Mantém o sessionId e reinicia o tempo
+      setSessionStartTime(new Date(data.updatedAt)); 
+    } catch (error) {
+      console.error('Erro ao reiniciar a sessão:', error);
+    }
+  };
+   
 
   useEffect(() => {
     if (!sessionStartTime) return;
@@ -165,7 +193,8 @@ const Game: React.FC = () => {
       </div>
 
       {/* 🔹 Sidebar agora está completamente separada */}
-      <Sidebar movesCount={movesCount} timeElapsed={timeElapsed} />
+      <Sidebar movesCount={movesCount} timeElapsed={timeElapsed} onRestart={handleRestart} />
+
     </div>
   );
 };
