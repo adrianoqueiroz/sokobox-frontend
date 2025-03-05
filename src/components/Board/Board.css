@@ -1,57 +1,64 @@
 .board {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
-  }
-  
-  .board-row {
-    display: flex;
-  }
-  
-  .cell {
-    width: 50px;
-    height: 50px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #ccc;
-  }
-  
-  /* 🔹 Terreno sempre fixo no fundo */
-  .cell-terrain {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-    z-index: 1; /* Sempre por baixo dos objetos */
-  }
-  
-  /* 🔹 Objetos animados */
-  .cell-object {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-    transition: transform 0.2s ease-out;
-    background-color: transparent; /* Remove fundo sólido */
-  }
-  
-  /* 🔹 Estilos para o terreno */
-  .terrain-wall { background-color: #555; }
-  .terrain-floor, .terrain-destination { background-color: #ddd; }
-  
-  /* 🔹 Estilos para os objetos */
-  .object-player { color: blue; z-index: 3; }
-  .object-box { color: brown; z-index: 2; }
-  .object-box.terrain-destination { color: green; z-index: 2; } /* Mantém a caixa visível no destino */
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.board-row {
+  display: flex;
+}
+
+.cell {
+  width: 50px;
+  height: 50px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
+}
+
+/* 🔹 Terreno sempre fixo no fundo */
+.cell-terrain {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  z-index: 1; /* Sempre por baixo dos objetos */
+}
+
+/* 🔹 Objetos animados */
+.cell-object {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  transition: transform 0.2s ease-out;
+  background-color: transparent; /* Remove fundo sólido */
+}
+
+
+/* ✅ DESTINATION quando tem uma caixa sobre ele */
+.destination-active {
+  background-color: #a0f0a0 !important; /* Fundo verde claro */
+  border: 3px solid green;
+  border-radius: 5px;
+}
+
+/* 🔹 Estilos para o terreno */
+.terrain-wall { background-color: #555; }
+.terrain-floor, .terrain-destination { background-color: #ddd; }
+
+/* 🔹 Estilos para os objetos */
+.object-player { color: blue; z-index: 3; }
+.object-box { color: brown; z-index: 2; }
+.object-box.terrain-destination { color: green; z-index: 2; } /* Mantém a caixa visível no destino */

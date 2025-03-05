@@ -22,15 +22,15 @@ export enum MoveDirection {
 
 // Estrutura para representar um objeto movido
 export interface MovedObject {
-  type: ObjectType;
-  fromRow: number;
-  fromCol: number;
-  toRow: number;
-  toCol: number;
+  type: ObjectType
+  fromRow: number
+  fromCol: number
+  toRow: number
+  toCol: number
 }
 
 // Estrutura do movimento realizado
 export interface MoveRecord {
-  direction: MoveDirection;
-  movedObjects: MovedObject[];
+  direction: MoveDirection
+  movedObjects: MovedObject[]
 }
