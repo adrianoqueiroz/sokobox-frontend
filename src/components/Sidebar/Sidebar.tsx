@@ -16,7 +16,7 @@ const Sidebar: React.FC<SidebarProps> = ({ movesCount, timeElapsed }) => {
 
   return (
     <div className="game-sidebar">
-      <h1>SokoBox</h1>
+      <h1 className="sokobox-logo">SokoBox</h1>
 
       <h2>Estatísticas</h2>
       <p>🔄 Movimentos: {movesCount}</p>

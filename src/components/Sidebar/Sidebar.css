@@ -54,3 +54,58 @@ h1 {
     background-color: #218838;
   }
   
+
+
+  .sokobox-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 36px;
+    font-weight: bold;
+    color: cyan;
+    text-shadow: 0px 0px 10px blue;
+    position: relative;
+    display: inline-block;
+    padding: 10px 30px;
+    margin-top: 30px;
+    margin-bottom: 50px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* 🚀 Foguete posicionado na frente do texto */
+.sokobox-logo::before {
+    content: '🚀';
+    font-size: 30px;
+    position: absolute;
+    left: -5px; /* 🔹 Move o foguete para a frente do texto */
+    top: 50%;
+    transform: translateY(-50%);
+    animation: fire-rocket 1s infinite alternate;
+}
+
+/* 🔥 Animação do foguete mexendo levemente */
+@keyframes fire-rocket {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(-10deg); }
+}
+
+/* 🔥 Rastro de fogo ajustado logo abaixo do nome */
+.sokobox-logo::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom:-15px; /* 🔹 Coloca o rastro mais próximo ao texto */
+    width: 115%;
+    height: 20px;
+    background: radial-gradient(circle, orange 20%, transparent 80%);
+    opacity: 0.9;
+    filter: blur(5px);
+    transform: translateX(-50%);
+    border-radius: 50%;
+    animation: fire-trail 1.2s infinite alternate;
+}
+
+/* 🔥 Animação do rastro pulsando suavemente */
+@keyframes fire-trail {
+    0% { opacity: 0.9; transform: translateX(-50%) scale(1); }
+    100% { opacity: 0.6; transform: translateX(-50%) scale(1.1); }
+}
