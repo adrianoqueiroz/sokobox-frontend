@@ -9,6 +9,10 @@ interface SidebarProps {
   phaseName: string;
   onPreviousPhase: () => void;
   onNextPhase: () => void;
+  onUndoMove: () => void;  // 🔹 Novo botão para voltar movimento
+  onRedoMove: () => void;  // 🔹 Novo botão para refazer movimento
+  canUndo: boolean;  // 🔹 Verifica se pode retroceder
+  canRedo: boolean;  // 🔹 Verifica se pode avançar
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -17,7 +21,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   onRestart,
   phaseName,
   onPreviousPhase,
-  onNextPhase
+  onNextPhase,
+  onUndoMove,
+  onRedoMove,
+  canUndo,
+  canRedo
 }) => {
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -49,6 +57,13 @@ const Sidebar: React.FC<SidebarProps> = ({
           <span className="stats-text">Tempo:</span>
           <span className="stats-value">{formatTime(timeElapsed)}</span>
         </div>
+      </div>
+
+      {/* 🔹 Navegação entre movimentos */}
+      <div className="move-navigation">
+        <button className="move-button prev" onClick={onUndoMove} disabled={!canUndo}>‹</button>
+        <span className="move-label">Movimentos</span>
+        <button className="move-button next" onClick={onRedoMove} disabled={!canRedo}>›</button>
       </div>
 
       {/* 🔹 Botão de reiniciar estilizado */}

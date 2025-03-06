@@ -21,6 +21,35 @@ const Game: React.FC = () => {
   const [phases, setPhases] = useState<{ id: string, name: string }[]>([]);
   const [phaseIndex, setPhaseIndex] = useState(0);
 
+  const [moveHistory, setMoveHistory] = useState<ObjectType[][][]>([]);  // 🔹 Histórico de movimentos
+  const [currentMoveIndex, setCurrentMoveIndex] = useState(0);  // 🔹 Índice do movimento atual
+
+  // 🔹 Atualiza o histórico ao fazer um movimento
+  useEffect(() => {
+    if (!sessionId) return;
+
+    if (moveHistory.length === 0 || currentMoveIndex === moveHistory.length - 1) {
+      setMoveHistory([...moveHistory, objects]);
+      setCurrentMoveIndex(moveHistory.length);
+    }
+  }, [objects]);
+
+  // 🔹 Volta um movimento no histórico
+  const handleUndoMove = () => {
+    if (currentMoveIndex > 0) {
+      setCurrentMoveIndex(currentMoveIndex - 1);
+      setObjects(moveHistory[currentMoveIndex - 1]);
+    }
+  };
+
+  // 🔹 Refaz um movimento no histórico
+  const handleRedoMove = () => {
+    if (currentMoveIndex < moveHistory.length - 1) {
+      setCurrentMoveIndex(currentMoveIndex + 1);
+      setObjects(moveHistory[currentMoveIndex + 1]);
+    }
+  };
+
   useEffect(() => {
     getPhases().then((data) => {
       setPhases(data);
@@ -138,14 +167,19 @@ const Game: React.FC = () => {
       <div className="game-container">
         {isLoading ? <p>Carregando sessão...</p> : <Board terrain={terrain} objects={objects} animatingObjects={animatingObjects} />}
       </div>
-      <Sidebar
-        movesCount={movesCount}
-        timeElapsed={timeElapsed}
-        onRestart={handleRestart}
+      <Sidebar 
+        movesCount={movesCount} 
+        timeElapsed={timeElapsed} 
+        onRestart={handleRestart} 
         phaseName={phases[phaseIndex]?.name || "Fase Desconhecida"}
-        onPreviousPhase={handlePreviousPhase}
-        onNextPhase={handleNextPhase}
+        onPreviousPhase={handlePreviousPhase} 
+        onNextPhase={handleNextPhase} 
+        onUndoMove={handleUndoMove} 
+        onRedoMove={handleRedoMove} 
+        canUndo={currentMoveIndex > 0}
+        canRedo={currentMoveIndex < moveHistory.length - 1}
       />
+
     </div>
   );
 };
