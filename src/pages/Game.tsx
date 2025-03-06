@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Board from '../components/Board/Board';
 import Sidebar from '../components/Sidebar/Sidebar';
-import {
-  ObjectType,
-  TerrainType,
-  MoveDirection,
-  MovedObject,
-} from '../types/GameTypes';
+import { getLatestSession, restartSession, getPhases } from '../services/sessionService';
+import { sendMove } from '../services/moveService';
+import { TerrainType, ObjectType, MoveDirection, MovedObject } from '../types/GameTypes';
 import './Game.css';
 
 const Game: React.FC = () => {
@@ -20,84 +17,51 @@ const Game: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [movesCount, setMovesCount] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
-  
-  // 🔹 Busca a última sessão disponível no backend
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
+  const [phases, setPhases] = useState<{ id: string, name: string }[]>([]);
+  const [phaseIndex, setPhaseIndex] = useState(0);
 
   useEffect(() => {
-    fetch('http://localhost:8080/sessions/latest')
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.sessionId) {
-          setSessionId(data.sessionId);
-          setTerrain(data.terrain);
-          setObjects(data.objects);
-  
-          // ✅ Converte createdAt do backend para um objeto Date
-          if (data.createdAt) {
-            setSessionStartTime(new Date(data.createdAt));
-          }
-  
-          // ✅ Atualiza a contagem de movimentos com o tamanho da lista de moves
-          if (data.moves) {
-            setMovesCount(data.moves.length);
-          }
-  
-          setIsLoading(false);
-        } else {
-          console.error('Nenhuma sessão encontrada.');
-          setIsLoading(false);
-        }
-      })
-      .catch((error) => {
-        console.error('Erro ao carregar a sessão:', error);
-        setIsLoading(false);
-      });
-  }, []);
+    getPhases().then((data) => {
+      setPhases(data);
+      setPhaseIndex(0);
+    });
 
-  const handleRestart = async () => {
-    if (!sessionId) return;
-  
-    try {
-      const response = await fetch(`http://localhost:8080/sessions/${sessionId}/restart`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-      });
-  
-      if (!response.ok) {
-        throw new Error('Erro ao reiniciar a sessão');
+    getLatestSession().then((data) => {
+      if (data) {
+        setSessionId(data.sessionId);
+        setTerrain(data.terrain);
+        setObjects(data.objects);
+        if (data.createdAt) setSessionStartTime(new Date(data.createdAt));
+        if (data.moves) setMovesCount(data.moves.length);
+        setIsLoading(false);
       }
-  
-      const data = await response.json();
-  
-      // 🔄 Atualiza os estados sem trocar de sessão
-      setTerrain(data.terrain);
-      setObjects(data.objects);
-      setMovesCount(0);
-      setTimeElapsed(0);
-  
-      // ✅ Mantém o sessionId e reinicia o tempo
-      setSessionStartTime(new Date(data.updatedAt)); 
-    } catch (error) {
-      console.error('Erro ao reiniciar a sessão:', error);
-    }
-  };
-   
+    });
+  }, []);
 
   useEffect(() => {
     if (!sessionStartTime) return;
-  
     const interval = setInterval(() => {
       const now = new Date();
       const elapsedTime = Math.floor((now.getTime() - sessionStartTime.getTime()) / 1000);
       setTimeElapsed(elapsedTime);
     }, 1000);
-  
     return () => clearInterval(interval);
   }, [sessionStartTime]);
-  
 
-  // 🔹 Captura eventos do teclado e adiciona à fila de movimentos
+  const handleRestart = async () => {
+    if (!sessionId) return;
+    const data = await restartSession(sessionId);
+    if (data) {
+      setTerrain(data.terrain);
+      setObjects(data.objects);
+      setMovesCount(0);
+      setTimeElapsed(0);
+      setSessionStartTime(new Date(data.updatedAt));
+    }
+  };
+
+  // ✅ Corrigido: Evento de teclado para adicionar movimento à fila
   useEffect(() => {
     if (!sessionId) return;
 
@@ -118,7 +82,7 @@ const Game: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [sessionId]);
 
-  // 🔹 Processa a fila de movimentos com tratamento para erros
+  // ✅ Corrigido: Processamento da fila de movimentos
   useEffect(() => {
     if (!sessionId || moveQueue.length === 0 || isMoving || isProcessingQueue)
       return;
@@ -135,36 +99,19 @@ const Game: React.FC = () => {
       const move = moveQueue[0];
   
       try {
-        const response = await fetch('http://localhost:8080/moves', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId, direction: move }),
-        });
-  
-        if (!response.ok) {
-          throw new Error('Erro ao mover o jogador');
-        }
-  
-        const data = await response.json();
+        const data = await sendMove(sessionId, move);
+        if (!data) throw new Error("Erro ao mover o jogador");
+
         const lastMove = data.moves[data.moves.length - 1] || {};
-  
         setAnimatingObjects(lastMove.movedObjects || []);
-  
+
         setTimeout(() => {
           setObjects(data.objects);
           setAnimatingObjects([]);
           setMoveQueue((prevQueue) => prevQueue.slice(1));
-  
-          // ✅ Atualiza a contagem de movimentos com base no tamanho da lista de moves retornada
           setMovesCount(data.moves.length);
-  
           setIsMoving(false);
-  
-          if (moveQueue.length > 1) {
-            processNextMove();
-          } else {
-            setIsProcessingQueue(false);
-          }
+          setIsProcessingQueue(false);
         }, 200);
       } catch (error) {
         console.error('Erro ao mover:', error);
@@ -175,26 +122,30 @@ const Game: React.FC = () => {
     };
   
     processNextMove();
-  }, [sessionId, moveQueue, isMoving, isProcessingQueue]);  
+  }, [sessionId, moveQueue, isMoving, isProcessingQueue]);
+
+  // ✅ Mantém os botões de fase como estavam antes
+  const handlePreviousPhase = () => {
+    setPhaseIndex((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+
+  const handleNextPhase = () => {
+    setPhaseIndex((prev) => (prev < phases.length - 1 ? prev + 1 : prev));
+  };
 
   return (
     <div className="game-wrapper">
-      {/* 🔹 O Board agora é um componente independente */}
       <div className="game-container">
-        {isLoading ? (
-          <p>Carregando sessão...</p>
-        ) : (
-          <Board
-            terrain={terrain}
-            objects={objects}
-            animatingObjects={animatingObjects}
-          />
-        )}
+        {isLoading ? <p>Carregando sessão...</p> : <Board terrain={terrain} objects={objects} animatingObjects={animatingObjects} />}
       </div>
-
-      {/* 🔹 Sidebar agora está completamente separada */}
-      <Sidebar movesCount={movesCount} timeElapsed={timeElapsed} onRestart={handleRestart} />
-
+      <Sidebar
+        movesCount={movesCount}
+        timeElapsed={timeElapsed}
+        onRestart={handleRestart}
+        phaseName={phases[phaseIndex]?.name || "Fase Desconhecida"}
+        onPreviousPhase={handlePreviousPhase}
+        onNextPhase={handleNextPhase}
+      />
     </div>
   );
 };

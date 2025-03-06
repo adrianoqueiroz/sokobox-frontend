@@ -4,15 +4,3 @@
   box-sizing: border-box;
   font-family: Arial, sans-serif;
 }
-
-body {
-  background-image: url('/assets/background.png'); /* Substitua pelo caminho correto */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}

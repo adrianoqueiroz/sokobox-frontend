@@ -6,7 +6,7 @@
   align-items: center;
   border: 4px solid rgba(34, 35, 37, 0.67);
   border-radius: 10px; /* 🔹 Mantém um visual arredondado, opcional */
-  box-shadow: 0 20px 20px rgba(34, 36, 39, 0.67);
+  box-shadow: 0 5px 20px rgba(34, 36, 39, 0.67);
 
 }
 
@@ -64,17 +64,17 @@
 
 /* 🔹 Estilos para o terreno */
 .terrain-wall {
-  background-image: url('/assets/wall2.png'); /* Caminho da imagem */
+  background-image: url('/assets/wall.png'); /* Caminho da imagem */
   background-size: cover; /* Garante que a imagem ocupe todo o espaço */
   background-position: center;
 }
 
 .terrain-floor, .terrain-destination { 
-  background-image: url('/assets/floor.png'); /* Caminho da imagem */
+  background-image: url('/assets/floor4.png'); /* Caminho da imagem */
   background-size: cover; /* Garante que a imagem ocupe todo o espaço */
   background-position: center;
 
-  box-shadow: 0px 0px 0px 0.5px black; 
+  box-shadow: 0px 0px 0px 0.3px black; 
   border-radius: 1px;
 }
 

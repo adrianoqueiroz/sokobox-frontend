@@ -1,8 +1,15 @@
-/* 🔹 Sidebar agora tem um posicionamento fixo separado do game */
+
 .game-sidebar {
     width: 250px;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
+    background-image: url('/assets/sidebar-background.png');
+    background-size: cover;
+    background-position: center;
+    
+    /* 🔹 Aplica um escurecimento sobre a imagem */
+    background-color: rgba(0, 0, 0, 0.7); 
+    background-blend-mode: darken; 
+
     color: white;
     display: flex;
     flex-direction: column;
@@ -12,19 +19,10 @@
     text-align: center;
     box-shadow: -2px 0px 5px rgba(0, 0, 0, 0.5);
     
-    /* 🔹 Mantém a sidebar fixa na lateral direita */
     position: fixed;
     top: 0;
     right: 0;
 }
-
-
-h1 {
-    font-family: 'Orbitron', sans-serif;
-    color: cyan;
-    text-shadow: 0px 0px 10px blue;
-    padding: 30px;
-  }
 
   /* 🔹 Ajustando o título da sidebar */
   .game-sidebar h2 {
@@ -37,24 +35,6 @@ h1 {
     font-size: 18px;
     margin: 5px 0;
   }
-  
-  /* 🔹 Estilizando o botão de replay */
-  .replay-button {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    margin-top: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  .replay-button:hover {
-    background-color: #218838;
-  }
-  
-
 
   .sokobox-logo {
     font-family: 'Orbitron', sans-serif;
@@ -64,9 +44,8 @@ h1 {
     text-shadow: 0px 0px 10px blue;
     position: relative;
     display: inline-block;
-    padding: 10px 30px;
-    margin-top: 30px;
-    margin-bottom: 50px;
+    padding: 20px 40px 15px;
+    margin-bottom: 20px;
     text-align: center;
     white-space: nowrap;
 }
@@ -74,18 +53,18 @@ h1 {
 /* 🚀 Foguete posicionado na frente do texto */
 .sokobox-logo::before {
     content: '🚀';
-    font-size: 30px;
+    font-size: 25px;
     position: absolute;
-    left: -5px; /* 🔹 Move o foguete para a frente do texto */
+    left:12px; /* 🔹 Move o foguete para a frente do texto */
     top: 50%;
     transform: translateY(-50%);
-    animation: fire-rocket 1s infinite alternate;
+    animation: fire-rocket 0.8s infinite alternate;
 }
 
 /* 🔥 Animação do foguete mexendo levemente */
 @keyframes fire-rocket {
     0% { transform: translateY(-50%) rotate(0deg); }
-    100% { transform: translateY(-50%) rotate(-10deg); }
+    100% { transform: translateY(-30%) rotate(-15deg); }
 }
 
 /* 🔥 Rastro de fogo ajustado logo abaixo do nome */
@@ -93,7 +72,7 @@ h1 {
     content: "";
     position: absolute;
     left: 50%;
-    bottom:-15px; /* 🔹 Coloca o rastro mais próximo ao texto */
+    bottom:-10px; /* 🔹 Coloca o rastro mais próximo ao texto */
     width: 115%;
     height: 20px;
     background: radial-gradient(circle, orange 20%, transparent 80%);
@@ -110,6 +89,7 @@ h1 {
     100% { opacity: 0.6; transform: translateX(-50%) scale(1.1); }
 }
 
+
 /* 🔄 Estilizando o botão de reiniciar */
 .restart-button {
     background-color: #dc3545; /* 🔴 Vermelho para indicar reinício */
@@ -125,4 +105,51 @@ h1 {
 
 .restart-button:hover {
     background-color: #c82333;
+}
+
+/* 🔹 Botão de reiniciar */
+.restart-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin-top: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.restart-button:hover {
+    background-color: #c82333;
+}
+
+.stats-container {
+    background: rgba(0, 0, 0, 0.5); /* 🔹 Fundo translúcido */
+    padding: 12px 18px;
+    border-radius: 8px;
+    margin-top: 15px;
+    width: 80%; /* 🔹 Mantém proporção dentro da sidebar */
+    text-align: left;
+    box-shadow: 0px 0px 10px rgba(0, 255, 255, 0.3); /* 🔹 Sutil efeito glow */
+}
+
+.stats-item {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.stats-icon {
+    font-size: 20px; /* 🔹 Ícone ligeiramente maior */
+    margin-right: 8px;
+    color: cyan; /* 🔹 Cor futurista */
+}
+
+.stats-numbers {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 16px;
 }
