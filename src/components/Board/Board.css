@@ -4,15 +4,10 @@
   align-items: center;
   justify-content: center;
   align-items: center;
-  border: 5px solid rgba(34, 36, 39, 0.67);
+  border: 4px solid rgba(34, 35, 37, 0.67);
   border-radius: 10px; /* 🔹 Mantém um visual arredondado, opcional */
-  animation: boardAnimation 1s infinite alternate;
-}
+  box-shadow: 0 20px 20px rgba(34, 36, 39, 0.67);
 
-@keyframes boardAnimation {
-  0% { box-shadow: 0 0 5px rgba(34, 36, 39, 0.67); }
-  50% { box-shadow: 0 0 30px rgba(34, 36, 39, 0.67); }
-  100% { box-shadow: 0 0 10px rgba(34, 36, 39, 0.67); }
 }
 
 .board-row {
@@ -79,26 +74,23 @@
   background-size: cover; /* Garante que a imagem ocupe todo o espaço */
   background-position: center;
 
-  box-shadow: 0px 0px 0px 1px black; /* ✅ Cria um efeito de borda sobre a caixa */
+  box-shadow: 0px 0px 0px 0.5px black; 
   border-radius: 1px;
 }
 
+.object-box.destination-active {
+  outline: 1px solid red; /* ✅ Adiciona uma borda externa sem reduzir a caixa */
+  border-radius: 5px; /* 🔹 Mantém um visual arredondado, opcional */
+  animation: glow 1s infinite alternate;
+}
 
 /* 🔹 Animação para o destino */
 @keyframes glow {
-  0% { box-shadow: 0 0 5px cyan; }
-  50% { box-shadow: 0 0 15px cyan; }
-  100% { box-shadow: 0 0 5px cyan; }
-}
-
-
-.object-box.destination-active {
-  outline: 1px solid green; /* ✅ Adiciona uma borda externa sem reduzir a caixa */
-  border-radius: 5px; /* 🔹 Mantém um visual arredondado, opcional */
-  animation: glow 1s infinite alternate;
+  0% { box-shadow: 0 0 10px red; }
+  50% { box-shadow: 0 0 25px red; }
+  100% { box-shadow: 0 0 10px rgba(93, 0, 0, 0.67); }
 }
 
 /* 🔹 Estilos para os objetos */
 .object-player { color: blue; z-index: 3; }
 .object-box { color: brown; z-index: 2; }
-.object-box.terrain-destination { color: green; z-index: 2; } /* Mantém a caixa visível no destino */
