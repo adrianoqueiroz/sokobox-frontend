@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Board from '../components/Board/Board';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { getLatestSession, restartSession, getPhases } from '../services/sessionService';
-import { sendMove } from '../services/moveService';
 import { TerrainType, ObjectType, MoveDirection, MovedObject } from '../types/GameTypes';
+import { useWebSocket } from '../hooks/useWebSocket'; // Import do hook do WebSocket
 import './Game.css';
 
 const Game: React.FC = () => {
@@ -21,10 +21,15 @@ const Game: React.FC = () => {
   const [phases, setPhases] = useState<{ id: string, name: string }[]>([]);
   const [phaseIndex, setPhaseIndex] = useState(0);
 
-  const [moveHistory, setMoveHistory] = useState<ObjectType[][][]>([]);  // 🔹 Histórico de movimentos
-  const [currentMoveIndex, setCurrentMoveIndex] = useState(0);  // 🔹 Índice do movimento atual
+  const [moveHistory, setMoveHistory] = useState<ObjectType[][][]>([]);
+  const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
+  const [playerDirection, setPlayerDirection] = useState<'up'|'down'|'left'|'right'>('down');
 
-  // 🔹 Atualiza o histórico ao fazer um movimento
+
+  // Hook do WebSocket
+  const { gameState, sendMove: sendMoveWS } = useWebSocket();
+
+  // Atualiza o histórico de movimentos
   useEffect(() => {
     if (!sessionId) return;
 
@@ -34,7 +39,6 @@ const Game: React.FC = () => {
     }
   }, [objects]);
 
-  // 🔹 Volta um movimento no histórico
   const handleUndoMove = () => {
     if (currentMoveIndex > 0) {
       setCurrentMoveIndex(currentMoveIndex - 1);
@@ -42,7 +46,6 @@ const Game: React.FC = () => {
     }
   };
 
-  // 🔹 Refaz um movimento no histórico
   const handleRedoMove = () => {
     if (currentMoveIndex < moveHistory.length - 1) {
       setCurrentMoveIndex(currentMoveIndex + 1);
@@ -90,7 +93,7 @@ const Game: React.FC = () => {
     }
   };
 
-  // ✅ Corrigido: Evento de teclado para adicionar movimento à fila
+  // Adiciona movimento à fila via evento de teclado
   useEffect(() => {
     if (!sessionId) return;
 
@@ -111,49 +114,56 @@ const Game: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [sessionId]);
 
-  // ✅ Corrigido: Processamento da fila de movimentos
+  // Processa a fila de movimentos via WebSocket
   useEffect(() => {
-    if (!sessionId || moveQueue.length === 0 || isMoving || isProcessingQueue)
-      return;
+    if (!sessionId || moveQueue.length === 0 || isMoving || isProcessingQueue) return;
   
     setIsProcessingQueue(true);
   
-    const processNextMove = async () => {
-      if (moveQueue.length === 0) {
-        setIsProcessingQueue(false);
-        return;
-      }
+    const move = moveQueue[0];
+    setIsMoving(true);
   
-      setIsMoving(true);
-      const move = moveQueue[0];
+    // Envia o movimento pelo WebSocket
+    sendMoveWS(sessionId, move, currentMoveIndex);
   
-      try {
-        const data = await sendMove(sessionId, move);
-        if (!data) throw new Error("Erro ao mover o jogador");
+    // Remove o movimento enviado da fila
+    setMoveQueue((prevQueue) => prevQueue.slice(1));
+  }, [sessionId, moveQueue, isMoving, isProcessingQueue, sendMoveWS, currentMoveIndex]);
 
-        const lastMove = data.moves[data.moves.length - 1] || {};
-        setAnimatingObjects(lastMove.movedObjects || []);
+  // Atualiza o estado do jogo a partir do gameState recebido via WebSocket
+  useEffect(() => {
+    if (gameState) {
+      console.log("gameState recebido:", gameState);
+      const { moves, objects } = gameState;
+      const lastMove = moves && moves.length > 0 ? moves[moves.length - 1] : null;
+      if (lastMove && lastMove.movedObjects) {
+        console.log("Atualizando animação com movedObjects:", lastMove.movedObjects);
+        setAnimatingObjects(lastMove.movedObjects);
 
+        // Procura a movimentação do player e define a direção final
+        const playerMove = lastMove.movedObjects.find((obj: MovedObject) => obj.type === 'PLAYER');
+        if (playerMove) {
+          let direction: 'up' | 'down' | 'left' | 'right' = 'down';
+          if (playerMove.toRow < playerMove.fromRow) direction = 'up';
+          else if (playerMove.toRow > playerMove.fromRow) direction = 'down';
+          else if (playerMove.toCol < playerMove.fromCol) direction = 'left';
+          else if (playerMove.toCol > playerMove.fromCol) direction = 'right';
+          setPlayerDirection(direction);
+        }
+        
+        // Limpa a animação após 500ms
         setTimeout(() => {
-          setObjects(data.objects);
           setAnimatingObjects([]);
-          setMoveQueue((prevQueue) => prevQueue.slice(1));
-          setMovesCount(data.moves.length);
-          setIsMoving(false);
-          setIsProcessingQueue(false);
-        }, 200);
-      } catch (error) {
-        console.error('Erro ao mover:', error);
-        setMoveQueue((prevQueue) => prevQueue.slice(1));
-        setIsMoving(false);
-        setIsProcessingQueue(false);
+        }, 500);
       }
-    };
+      setObjects(objects);
+      setMovesCount(moves.length);
+      setIsMoving(false);
+      setIsProcessingQueue(false);
+    }
+  }, [gameState]);
   
-    processNextMove();
-  }, [sessionId, moveQueue, isMoving, isProcessingQueue]);
 
-  // ✅ Mantém os botões de fase como estavam antes
   const handlePreviousPhase = () => {
     setPhaseIndex((prev) => (prev > 0 ? prev - 1 : prev));
   };
@@ -165,7 +175,16 @@ const Game: React.FC = () => {
   return (
     <div className="game-wrapper">
       <div className="game-container">
-        {isLoading ? <p>Carregando sessão...</p> : <Board terrain={terrain} objects={objects} animatingObjects={animatingObjects} />}
+        {isLoading ? <p>Carregando sessão...</p> : (
+          <Board 
+            terrain={terrain} 
+            objects={objects} 
+            animatingObjects={animatingObjects}
+            playerDirection={playerDirection}
+            isMoving={isMoving}  // nova prop
+          />
+
+        )}
       </div>
       <Sidebar 
         movesCount={movesCount} 
@@ -179,7 +198,6 @@ const Game: React.FC = () => {
         canUndo={currentMoveIndex > 0}
         canRedo={currentMoveIndex < moveHistory.length - 1}
       />
-
     </div>
   );
 };

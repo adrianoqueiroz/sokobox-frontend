@@ -1,13 +1,14 @@
 .board {
+  box-sizing: content-box;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  align-items: center;
   border: 4px solid rgba(34, 35, 37, 0.67);
-  border-radius: 10px; /* 🔹 Mantém um visual arredondado, opcional */
+  border-radius: 10px;
   box-shadow: 0 5px 20px rgba(34, 36, 39, 0.67);
-
 }
 
 .board-row {
@@ -94,3 +95,5 @@
 /* 🔹 Estilos para os objetos */
 .object-player { color: blue; z-index: 3; }
 .object-box { color: brown; z-index: 2; }
+
+

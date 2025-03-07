@@ -20,14 +20,15 @@ export enum MoveDirection {
   RIGHT = 'RIGHT',
 }
 
-// Estrutura para representar um objeto movido
-export interface MovedObject {
-  type: ObjectType
-  fromRow: number
-  fromCol: number
-  toRow: number
-  toCol: number
-}
+export type MovedObject = {
+    type: ObjectType;
+    fromRow: number;
+    fromCol: number;
+    toRow: number;
+    toCol: number;
+    progress: number; // ✅ Progresso da animação
+};
+
 
 // Estrutura do movimento realizado
 export interface MoveRecord {
