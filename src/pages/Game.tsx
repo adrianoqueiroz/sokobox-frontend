@@ -182,6 +182,20 @@ useEffect(() => {
     setPhaseIndex((prev) => (prev < phases.length - 1 ? prev + 1 : prev));
   };
 
+  // Dentro do Game.tsx (antes do return)
+  const playerPos = React.useMemo(() => {
+    for (let i = 0; i < objects.length; i++) {
+      for (let j = 0; j < objects[i].length; j++) {
+        if (objects[i][j] === 'PLAYER') {
+          return { row: i, col: j };
+        }
+      }
+    }
+    // Se não encontrar, retorna posição padrão (por exemplo, 0,0)
+    return { row: 0, col: 0 };
+  }, [objects]);
+
+
   return (
     <div className="game-wrapper">
       <div className="game-container">
@@ -191,7 +205,8 @@ useEffect(() => {
             objects={objects} 
             animatingObjects={animatingObjects}
             playerDirection={playerDirection}
-            isMoving={isMoving}
+            playerRow={playerPos.row}
+            playerCol={playerPos.col}
           />
         )}
       </div>

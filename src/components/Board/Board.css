@@ -1,14 +1,14 @@
 .board {
-  box-sizing: content-box;
-  margin: 0;
+  box-sizing: border-box; /* Recomendo border-box para facilitar o controle */
+  margin: 0 auto;         /* Centraliza horizontalmente o board no contêiner-pai */
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 4px solid rgba(34, 35, 37, 0.67);
+  display: block;         /* Use block para que o conteúdo não seja centralizado internamente */
+  position: relative;     /* Fundamental para que elementos absolutos se posicionem em relação a ele */
+  /* Simula uma borda interna de 4px */
+  box-shadow: inset 0 0 0 4px rgba(34, 35, 37, 0.67);
   border-radius: 10px;
-  box-shadow: 0 5px 20px rgba(34, 36, 39, 0.67);
+  box-shadow: inset 0 0 0 4px rgba(34, 35, 37, 0.67), 0 5px 20px rgba(34, 36, 39, 0.67);
+
 }
 
 .board-row {
@@ -22,8 +22,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* border: 1px solid #ccc; */
 }
+
 
 /* 🔹 Terreno sempre fixo no fundo */
 .cell-terrain {
@@ -96,4 +96,7 @@
 .object-player { color: blue; z-index: 3; }
 .object-box { color: brown; z-index: 2; }
 
-
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}

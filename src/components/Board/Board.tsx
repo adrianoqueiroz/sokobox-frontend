@@ -1,24 +1,31 @@
-import React, { useEffect } from 'react'
-import { ObjectType, TerrainType, MovedObject } from '../../types/GameTypes'
-import AnimatedObject from '../AnimatedObject/AnimatedObject'
-import './Board.css'
+import React from 'react';
+import { TerrainType, ObjectType, MovedObject } from '../../types/GameTypes';
+import Player from '../Player/Player';
+import Mover from '../Mover/Mover'; // Nosso componente genérico para objetos em movimento
+import './Board.css';
 
-const CELL_SIZE = 50
+const CELL_SIZE = 50;
 
 interface BoardProps {
-  terrain: TerrainType[][]
-  objects: ObjectType[][]
-  animatingObjects: MovedObject[]
-  playerDirection: 'up' | 'down' | 'left' | 'right'
-  isMoving: boolean  // nova prop
+  terrain: TerrainType[][];
+  objects: ObjectType[][];
+  animatingObjects: MovedObject[];
+  playerDirection: 'up' | 'down' | 'left' | 'right';
+  playerRow: number;
+  playerCol: number;
 }
 
-const Board: React.FC<BoardProps> = ({ terrain, objects, animatingObjects, playerDirection, isMoving }) => {
-  useEffect(() => {
-    if (animatingObjects.length > 0) {
-      console.log("animatingObjects atualizados:", animatingObjects)
-    }
-  }, [animatingObjects])
+const Board: React.FC<BoardProps> = ({
+  terrain,
+  objects,
+  animatingObjects,
+  playerDirection,
+  playerRow,
+  playerCol,
+}) => {
+  if (!terrain.length || !terrain[0].length) {
+    return <div className="board">Tabuleiro vazio ou inválido</div>;
+  }
 
   return (
     <div
@@ -29,89 +36,87 @@ const Board: React.FC<BoardProps> = ({ terrain, objects, animatingObjects, playe
         height: terrain.length * CELL_SIZE,
       }}
     >
+      {/* Camada 1: Terreno */}
       {terrain.map((row, rowIndex) => (
         <div key={rowIndex} className="board-row">
-          {row.map((terrainType, colIndex) => {
-            const objectType = objects[rowIndex]?.[colIndex] || 'NONE'
-            const isAnimatingDestination = animatingObjects.some(
-              (obj) => obj.toRow === rowIndex && obj.toCol === colIndex
-            )
-            const isBoxOnDestination =
-              objectType === 'BOX' && terrainType === 'DESTINATION'
-
-            return (
+          {row.map((terrainType, colIndex) => (
+            <div
+              key={colIndex}
+              className="cell"
+              style={{
+                width: CELL_SIZE,
+                height: CELL_SIZE,
+                position: 'relative',
+              }}
+            >
               <div
-                key={colIndex}
-                className="cell"
-                style={{ width: CELL_SIZE, height: CELL_SIZE, position: 'relative' }}
+                className={`cell-terrain terrain-${terrainType.toLowerCase()} ${
+                  terrainType === 'DESTINATION' ? 'destination-active' : ''
+                }`}
               >
-                <div
-                  className={`cell-terrain terrain-${terrainType.toLowerCase()} ${
-                    isBoxOnDestination ? 'destination-active' : ''
-                  }`}
-                >
-                  {terrainType === 'DESTINATION' ? '❌' : ''}
-                </div>
-
-                {/* Renderiza o objeto estático somente se não estiver sendo animado */}
-                {objectType !== 'NONE' && !isAnimatingDestination && (
-                  objectType === 'PLAYER' ? (
-                    <div className="cell-object object-player" style={{ width: CELL_SIZE, height: CELL_SIZE }}>
-                      {getPlayerSprite(playerDirection)}
-                    </div>
-                  ) : (
-                    <div
-                      className={`cell-object object-${objectType.toLowerCase()} ${
-                        objectType === 'BOX' && isBoxOnDestination ? 'destination-active' : ''
-                      }`}
-                      style={{ width: CELL_SIZE, height: CELL_SIZE }}
-                    >
-                      {getObjectSymbol(objectType)}
-                    </div>
-                  )
-                )}
-
+                {terrainType === 'DESTINATION' ? '❌' : ''}
               </div>
-            )
-          })}
+            </div>
+          ))}
         </div>
       ))}
 
-      {/* Camada de objetos animados sobre o tabuleiro */}
-      {animatingObjects.map((obj, index) => (
-        <AnimatedObject key={index} movedObject={obj} cellSize={CELL_SIZE} />
-      ))}
+      {/* Camada 2: Objetos estáticos (exceto PLAYER) */}
+      {terrain.map((row, rowIndex) =>
+        row.map((_, colIndex) => {
+          const objectType = objects[rowIndex]?.[colIndex] || 'NONE';
+          // Verifica se há um objeto animado nessa célula
+          const isAnimatingDestination = animatingObjects.some(
+            (obj) => obj.toRow === rowIndex && obj.toCol === colIndex
+          );
+          if (objectType !== 'NONE' && objectType !== 'PLAYER' && !isAnimatingDestination) {
+            return (
+              <div
+                key={`${rowIndex}-${colIndex}`}
+                className={`cell-object object-${objectType.toLowerCase()} ${
+                  objectType === 'BOX' ? 'destination-active' : ''
+                }`}
+                style={{
+                  width: CELL_SIZE,
+                  height: CELL_SIZE,
+                  position: 'absolute',
+                  top: rowIndex * CELL_SIZE,
+                  left: colIndex * CELL_SIZE,
+                }}
+              >
+                {/* Você pode renderizar um símbolo se quiser, por exemplo, para caixa: */}
+                {/* {objectType === 'BOX' ? '📦' : ''} */}
+              </div>
+            );
+          }
+          return null;
+        })
+      )}
+
+      {/* Camada 3: Objetos animados */}
+      {animatingObjects.map((obj, index) =>
+        obj.type !== 'PLAYER' ? (
+          <Mover
+            key={index}
+            imageUrl={obj.type === 'BOX' ? '/assets/box.png' : ''}
+            from={{ row: obj.fromRow, col: obj.fromCol }}
+            to={{ row: obj.toRow, col: obj.toCol }}
+            cellSize={CELL_SIZE}
+            useTransition={true}
+            transitionDuration={300}
+          />
+        ) : null
+      )}
+
+      {/* Camada 4: Player */}
+      <Player
+        row={playerRow}
+        col={playerCol}
+        direction={playerDirection}
+        cellSize={CELL_SIZE}
+      />
     </div>
-  )
-}
-
-// Para objetos que não são o player, mantenha o que já tinha (por exemplo, emoji ou outro)
-const getObjectSymbol = (objectType: ObjectType) => {
-  if (objectType === 'PLAYER') return null;
-  return ''
-}
-
-// Função que retorna o componente do player com o sprite correto baseado na direção
-const getPlayerSprite = (direction: 'up' | 'down' | 'left' | 'right') => {
-  let spriteRow = 0;
-  if (direction === 'up') spriteRow = 3; // ajuste conforme a linha correta do sprite para "costa"
-  else if (direction === 'left') spriteRow = 1;
-  else if (direction === 'right') spriteRow = 2;
-  // Para "down", spriteRow continua 0 (de frente)
-
-  // O frame idle é o segundo da sequência: índice 1
-  const bgPosition = `-${1 * 50}px -${spriteRow * 50}px`;
-
-  return (
-    <div style={{
-      width: '50px',
-      height: '50px',
-      background: "url('/assets/player-sprite.png') no-repeat",
-      backgroundSize: "600px 400px",
-      backgroundPosition: bgPosition,
-    }} />
   );
-}
+};
 
-
-export default Board
+export default Board;
