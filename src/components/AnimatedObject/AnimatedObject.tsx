@@ -12,70 +12,71 @@ const AnimatedObject: React.FC<AnimatedObjectProps> = ({ movedObject, cellSize }
     top: movedObject.fromRow * cellSize,
     left: movedObject.fromCol * cellSize,
   });
+  // Estado para o índice do frame (0, 1 ou 2)
+  const [currentFrame, setCurrentFrame] = useState(1); // 1 é a pose idle
 
-  // Só aplicamos a lógica de direção se for o player
-  let bgImage = "";
-  let bgSize = "";
-  let bgPosition = "";
+  // Determina a direção com base nas posições
+  let direction: 'up' | 'down' | 'left' | 'right' = 'down';
+  if (movedObject.toRow < movedObject.fromRow) direction = 'up';
+  else if (movedObject.toRow > movedObject.fromRow) direction = 'down';
+  else if (movedObject.toCol < movedObject.fromCol) direction = 'left';
+  else if (movedObject.toCol > movedObject.fromCol) direction = 'right';
 
-  if (movedObject.type === 'PLAYER') {
-    // Determina a direção com base nas posições (apenas para o player)
-    let direction: 'up' | 'down' | 'left' | 'right' = 'down';
-    if (movedObject.toRow < movedObject.fromRow) {
-      direction = 'up';
-    } else if (movedObject.toRow > movedObject.fromRow) {
-      direction = 'down';
-    } else if (movedObject.toCol < movedObject.fromCol) {
-      direction = 'left';
-    } else if (movedObject.toCol > movedObject.fromCol) {
-      direction = 'right';
-    }
-    
-    // Mapeia a direção para a posição do frame no sprite do player
-    switch (direction) {
-      case 'up':
-        bgPosition = "0 -150px";
-        break;
-      case 'left':
-        bgPosition = "0 -50px";
-        break;
-      case 'right':
-        bgPosition = "0 -100px";
-        break;
-      case 'down':
-      default:
-        bgPosition = "0 0";
-    }
-    
-    bgImage = "url('/assets/player-sprite.png')";
-    bgSize = "600px 400px"; // escala do sprite (384x256 -> 600x400 para frames 50x50)
-  } else if (movedObject.type === 'BOX') {
-    // Para a caixa, usa uma imagem estática da caixa
-    bgImage = "url('/assets/box.png')";
-    bgSize = "contain";
-    bgPosition = "center";
-  }
+  // Define a linha do sprite com base na direção:
+  // Usaremos: row 0 para "down/up", row 1 para "left" e row 2 para "right"
+// Determina a linha do sprite com base na direção:
+let spriteRow = 0;
+if (direction === 'up') spriteRow = 3;  // Usamos a linha 3 para quando o jogador está indo para cima (de costas)
+else if (direction === 'left') spriteRow = 1;
+else if (direction === 'right') spriteRow = 2;
+// Para "down" permanece spriteRow = 0 (de frente)
 
+  // Para "up" você pode optar por usar a mesma da frente (row 0) ou definir outra linha se tiver
+
+  // Inicia a transição da posição (com delay para o estado inicial ser renderizado)
   useEffect(() => {
-    const delayToStart = 50; // delay para garantir o estado inicial
-    const transitionDuration = 300; // duração da transição (ms)
-
-    // Define a posição inicial
-    setPositionStyle({
-      top: movedObject.fromRow * cellSize,
-      left: movedObject.fromCol * cellSize,
-    });
-
-    // Depois de um pequeno delay, inicia a transição para a posição final
+    const delayToStart = 50; // pequeno delay para garantir o estado inicial
     const timer = setTimeout(() => {
       setPositionStyle({
         top: movedObject.toRow * cellSize,
         left: movedObject.toCol * cellSize,
       });
     }, delayToStart);
-
     return () => clearTimeout(timer);
   }, [movedObject, cellSize]);
+
+  // Se o objeto for PLAYER, alterna os frames durante a transição
+  useEffect(() => {
+    if (movedObject.type !== 'PLAYER') return;
+    // Inicia um intervalo que alterna os frames a cada 100ms
+    const interval = setInterval(() => {
+      setCurrentFrame(prev => (prev + 1) % 3); // ciclo: 0 -> 1 -> 2 -> 0 -> ...
+    }, 100);
+    // Após 300ms (ou o tempo da transição), para a alternância e força o idle (frame 1)
+    const finishTimer = setTimeout(() => {
+      clearInterval(interval);
+      setCurrentFrame(1);
+    }, 300);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(finishTimer);
+    };
+  }, [movedObject]);
+
+  // Define o background com base no tipo do objeto
+  let bgImage = "";
+  let bgSize = "";
+  let bgPosition = "";
+  if (movedObject.type === 'PLAYER') {
+    bgImage = "url('/assets/player-sprite.png')";
+    bgSize = "600px 400px"; // Seu sprite original (384x256) escalado: 32px->50px (50/32 = 1.5625)
+    // Cada frame tem 50px de largura; o frame é definido por currentFrame e a linha por spriteRow
+    bgPosition = `-${currentFrame * cellSize}px -${spriteRow * cellSize}px`;
+  } else if (movedObject.type === 'BOX') {
+    bgImage = "url('/assets/box.png')";
+    bgSize = "contain";
+    bgPosition = "center";
+  }
 
   return (
     <div

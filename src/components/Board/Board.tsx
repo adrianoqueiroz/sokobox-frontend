@@ -56,12 +56,9 @@ const Board: React.FC<BoardProps> = ({ terrain, objects, animatingObjects, playe
                 {/* Renderiza o objeto estático somente se não estiver sendo animado */}
                 {objectType !== 'NONE' && !isAnimatingDestination && (
                   objectType === 'PLAYER' ? (
-                    // Se estiver em movimento, não renderiza o sprite estático do jogador
-                    !isMoving && (
-                      <div className="cell-object object-player" style={{ width: CELL_SIZE, height: CELL_SIZE }}>
-                        {getPlayerSprite(playerDirection)}
-                      </div>
-                    )
+                    <div className="cell-object object-player" style={{ width: CELL_SIZE, height: CELL_SIZE }}>
+                      {getPlayerSprite(playerDirection)}
+                    </div>
                   ) : (
                     <div
                       className={`cell-object object-${objectType.toLowerCase()} ${
@@ -73,6 +70,7 @@ const Board: React.FC<BoardProps> = ({ terrain, objects, animatingObjects, playe
                     </div>
                   )
                 )}
+
               </div>
             )
           })}
@@ -95,21 +93,15 @@ const getObjectSymbol = (objectType: ObjectType) => {
 
 // Função que retorna o componente do player com o sprite correto baseado na direção
 const getPlayerSprite = (direction: 'up' | 'down' | 'left' | 'right') => {
-  let bgPosition: string;
-  switch (direction) {
-    case 'up':
-      bgPosition = "0 -150px";
-      break;
-    case 'left':
-      bgPosition = "0 -50px";
-      break;
-    case 'right':
-      bgPosition = "0 -100px";
-      break;
-    case 'down':
-    default:
-      bgPosition = "0 0";
-  }
+  let spriteRow = 0;
+  if (direction === 'up') spriteRow = 3; // ajuste conforme a linha correta do sprite para "costa"
+  else if (direction === 'left') spriteRow = 1;
+  else if (direction === 'right') spriteRow = 2;
+  // Para "down", spriteRow continua 0 (de frente)
+
+  // O frame idle é o segundo da sequência: índice 1
+  const bgPosition = `-${1 * 50}px -${spriteRow * 50}px`;
+
   return (
     <div style={{
       width: '50px',
@@ -120,5 +112,6 @@ const getPlayerSprite = (direction: 'up' | 'down' | 'left' | 'right') => {
     }} />
   );
 }
+
 
 export default Board

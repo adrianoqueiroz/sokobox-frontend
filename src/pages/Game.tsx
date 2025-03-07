@@ -3,7 +3,7 @@ import Board from '../components/Board/Board';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { getLatestSession, restartSession, getPhases } from '../services/sessionService';
 import { TerrainType, ObjectType, MoveDirection, MovedObject } from '../types/GameTypes';
-import { useWebSocket } from '../hooks/useWebSocket'; // Import do hook do WebSocket
+import { useWebSocket } from '../hooks/useWebSocket';
 import './Game.css';
 
 const Game: React.FC = () => {
@@ -20,13 +20,10 @@ const Game: React.FC = () => {
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const [phases, setPhases] = useState<{ id: string, name: string }[]>([]);
   const [phaseIndex, setPhaseIndex] = useState(0);
-
   const [moveHistory, setMoveHistory] = useState<ObjectType[][][]>([]);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [playerDirection, setPlayerDirection] = useState<'up'|'down'|'left'|'right'>('down');
 
-
-  // Hook do WebSocket
   const { gameState, sendMove: sendMoveWS } = useWebSocket();
 
   // Atualiza o histórico de movimentos
@@ -98,8 +95,10 @@ const Game: React.FC = () => {
     if (!sessionId) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      let direction: MoveDirection | null = null;
+      // Ignora novas entradas se já estiver em movimento
+      if (isMoving) return;
 
+      let direction: MoveDirection | null = null;
       if (event.key === 'ArrowUp') direction = MoveDirection.UP;
       if (event.key === 'ArrowDown') direction = MoveDirection.DOWN;
       if (event.key === 'ArrowLeft') direction = MoveDirection.LEFT;
@@ -112,20 +111,19 @@ const Game: React.FC = () => {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [sessionId]);
+  }, [sessionId, isMoving]);
 
   // Processa a fila de movimentos via WebSocket
   useEffect(() => {
     if (!sessionId || moveQueue.length === 0 || isMoving || isProcessingQueue) return;
-  
+
     setIsProcessingQueue(true);
-  
     const move = moveQueue[0];
     setIsMoving(true);
-  
+
     // Envia o movimento pelo WebSocket
     sendMoveWS(sessionId, move, currentMoveIndex);
-  
+
     // Remove o movimento enviado da fila
     setMoveQueue((prevQueue) => prevQueue.slice(1));
   }, [sessionId, moveQueue, isMoving, isProcessingQueue, sendMoveWS, currentMoveIndex]);
@@ -133,14 +131,23 @@ const Game: React.FC = () => {
   // Atualiza o estado do jogo a partir do gameState recebido via WebSocket
   useEffect(() => {
     if (gameState) {
+      // Se o backend retornar "error: true", interrompe a atualização
+      if (gameState.error) {
+        console.error("Erro recebido do backend:", gameState.error);
+        setIsMoving(false);
+        setIsProcessingQueue(false);
+        return;
+      }
+
       console.log("gameState recebido:", gameState);
       const { moves, objects } = gameState;
+      setObjects(objects);
+      setMovesCount(moves.length);
       const lastMove = moves && moves.length > 0 ? moves[moves.length - 1] : null;
       if (lastMove && lastMove.movedObjects) {
         console.log("Atualizando animação com movedObjects:", lastMove.movedObjects);
         setAnimatingObjects(lastMove.movedObjects);
 
-        // Procura a movimentação do player e define a direção final
         const playerMove = lastMove.movedObjects.find((obj: MovedObject) => obj.type === 'PLAYER');
         if (playerMove) {
           let direction: 'up' | 'down' | 'left' | 'right' = 'down';
@@ -150,19 +157,15 @@ const Game: React.FC = () => {
           else if (playerMove.toCol > playerMove.fromCol) direction = 'right';
           setPlayerDirection(direction);
         }
-        
-        // Limpa a animação após 500ms
+
         setTimeout(() => {
           setAnimatingObjects([]);
         }, 500);
       }
-      setObjects(objects);
-      setMovesCount(moves.length);
       setIsMoving(false);
       setIsProcessingQueue(false);
     }
   }, [gameState]);
-  
 
   const handlePreviousPhase = () => {
     setPhaseIndex((prev) => (prev > 0 ? prev - 1 : prev));
@@ -181,9 +184,8 @@ const Game: React.FC = () => {
             objects={objects} 
             animatingObjects={animatingObjects}
             playerDirection={playerDirection}
-            isMoving={isMoving}  // nova prop
+            isMoving={isMoving}
           />
-
         )}
       </div>
       <Sidebar 
