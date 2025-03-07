@@ -129,43 +129,50 @@ const Game: React.FC = () => {
   }, [sessionId, moveQueue, isMoving, isProcessingQueue, sendMoveWS, currentMoveIndex]);
 
   // Atualiza o estado do jogo a partir do gameState recebido via WebSocket
-  useEffect(() => {
-    if (gameState) {
-      // Se o backend retornar "error: true", interrompe a atualização
-      if (gameState.error) {
-        console.error("Erro recebido do backend:", gameState.error);
+// Atualiza o estado do jogo a partir do gameState recebido via WebSocket
+useEffect(() => {
+  if (gameState) {
+    if (gameState.error) {
+      console.error("Erro recebido do backend:", gameState.error);
+      setIsMoving(false);
+      setIsProcessingQueue(false);
+      return;
+    }
+
+    console.log("gameState recebido:", gameState);
+    const { moves, objects } = gameState;
+    setObjects(objects);
+    setMovesCount(moves.length);
+    const lastMove = moves && moves.length > 0 ? moves[moves.length - 1] : null;
+    if (lastMove && lastMove.movedObjects) {
+      console.log("Atualizando animação com movedObjects:", lastMove.movedObjects);
+      setAnimatingObjects(lastMove.movedObjects);
+
+      // Atualiza a direção do player se houver movimento do PLAYER
+      const playerMove = lastMove.movedObjects.find((obj: MovedObject) => obj.type === 'PLAYER');
+      if (playerMove) {
+        let direction: 'up' | 'down' | 'left' | 'right' = 'down';
+        if (playerMove.toRow < playerMove.fromRow) direction = 'up';
+        else if (playerMove.toRow > playerMove.fromRow) direction = 'down';
+        else if (playerMove.toCol < playerMove.fromCol) direction = 'left';
+        else if (playerMove.toCol > playerMove.fromCol) direction = 'right';
+        setPlayerDirection(direction);
+      }
+
+      // Após 500ms (duração da animação), remove os AnimatedObjects e libera o próximo movimento
+      setTimeout(() => {
+        setAnimatingObjects([]);
         setIsMoving(false);
         setIsProcessingQueue(false);
-        return;
-      }
-
-      console.log("gameState recebido:", gameState);
-      const { moves, objects } = gameState;
-      setObjects(objects);
-      setMovesCount(moves.length);
-      const lastMove = moves && moves.length > 0 ? moves[moves.length - 1] : null;
-      if (lastMove && lastMove.movedObjects) {
-        console.log("Atualizando animação com movedObjects:", lastMove.movedObjects);
-        setAnimatingObjects(lastMove.movedObjects);
-
-        const playerMove = lastMove.movedObjects.find((obj: MovedObject) => obj.type === 'PLAYER');
-        if (playerMove) {
-          let direction: 'up' | 'down' | 'left' | 'right' = 'down';
-          if (playerMove.toRow < playerMove.fromRow) direction = 'up';
-          else if (playerMove.toRow > playerMove.fromRow) direction = 'down';
-          else if (playerMove.toCol < playerMove.fromCol) direction = 'left';
-          else if (playerMove.toCol > playerMove.fromCol) direction = 'right';
-          setPlayerDirection(direction);
-        }
-
-        setTimeout(() => {
-          setAnimatingObjects([]);
-        }, 500);
-      }
+      }, 280);
+    } else {
+      // Se não houver animação, libera imediatamente
       setIsMoving(false);
       setIsProcessingQueue(false);
     }
-  }, [gameState]);
+  }
+}, [gameState]);
+
 
   const handlePreviousPhase = () => {
     setPhaseIndex((prev) => (prev > 0 ? prev - 1 : prev));

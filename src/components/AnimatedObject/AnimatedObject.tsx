@@ -87,7 +87,7 @@ else if (direction === 'right') spriteRow = 2;
         height: cellSize,
         top: positionStyle.top,
         left: positionStyle.left,
-        transition: "top 0.3s, left 0.3s",
+        transition: "top 0.28s, left 0.28s",
         background: `${bgImage} no-repeat`,
         backgroundSize: bgSize,
         backgroundPosition: bgPosition,
