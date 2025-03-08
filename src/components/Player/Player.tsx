@@ -27,11 +27,11 @@ const Player: React.FC<PlayerProps> = ({ row, col, direction, cellSize }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentFrame(prev => (prev + 1) % 3);
-    }, 50);
+    }, 25);
     const timer = setTimeout(() => {
       clearInterval(interval);
     //   setCurrentFrame(1); // força o idle no final
-    }, 300);
+    }, 150);
     return () => {
       clearInterval(interval);
       clearTimeout(timer);

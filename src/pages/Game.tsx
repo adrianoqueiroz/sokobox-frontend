@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import Board from '../components/Board/Board';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { getLatestSession, restartSession, getPhases } from '../services/sessionService';
 import { TerrainType, ObjectType, MoveDirection, MovedObject } from '../types/GameTypes';
 import { useWebSocket } from '../hooks/useWebSocket';
+import SwipeableBoard from '../components/SwipeableBoard/Swipeableboard';
 import './Game.css';
 
 const Game: React.FC = () => {
@@ -113,6 +113,14 @@ const Game: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [sessionId, isMoving]);
 
+  const handleSwipe = (direction: MoveDirection) => {
+    // Aqui você pode optar por ignorar isMoving se quiser permitir movimentos contínuos
+
+    console.log('Swipe detectado:', direction);
+
+    setMoveQueue(prevQueue => [...prevQueue, direction]);
+  };  
+
   // Processa a fila de movimentos via WebSocket
   useEffect(() => {
     if (!sessionId || moveQueue.length === 0 || isMoving || isProcessingQueue) return;
@@ -185,6 +193,9 @@ useEffect(() => {
     setPhaseIndex((prev) => (prev < phases.length - 1 ? prev + 1 : prev));
   };
 
+
+
+
   // Dentro do Game.tsx (antes do return)
   const playerPos = React.useMemo(() => {
     for (let i = 0; i < objects.length; i++) {
@@ -202,10 +213,11 @@ useEffect(() => {
   return (
     <div className="game-wrapper">
       <div className="game-container">
-        {isLoading ? <p>Carregando sessão...</p> : (
-          <Board 
-            terrain={terrain} 
-            objects={objects} 
+      {isLoading ? <p>Carregando sessão...</p> : (
+          <SwipeableBoard
+            onSwipe={handleSwipe}
+            terrain={terrain}
+            objects={objects}
             animatingObjects={animatingObjects}
             playerDirection={playerDirection}
             playerRow={playerPos.row}

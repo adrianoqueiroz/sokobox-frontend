@@ -1,9 +1,8 @@
-// 📌 sessionService.ts
-const BASE_URL = 'http://localhost:8080';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const getLatestSession = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/sessions/latest`);
+    const response = await fetch(`${API_URL}/sessions/latest`);
     if (!response.ok) throw new Error('Erro ao buscar a sessão');
     return await response.json();
   } catch (error) {
@@ -14,7 +13,7 @@ export const getLatestSession = async () => {
 
 export const restartSession = async (sessionId: string) => {
   try {
-    const response = await fetch(`${BASE_URL}/sessions/${sessionId}/restart`, {
+    const response = await fetch(`${API_URL}/sessions/${sessionId}/restart`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -28,7 +27,7 @@ export const restartSession = async (sessionId: string) => {
 
 export const getPhases = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/phases`);
+    const response = await fetch(`${API_URL}/phases`);
     if (!response.ok) throw new Error('Erro ao buscar fases');
     return await response.json();
   } catch (error) {

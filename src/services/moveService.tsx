@@ -1,5 +1,4 @@
-// 📌 moveService.ts
-const BASE_URL = 'http://localhost:8080';
+const WS_URL = import.meta.env.VITE_WS_URL;
 
 export const sendMove = async (
   sessionId: string, 
@@ -7,7 +6,7 @@ export const sendMove = async (
   resetMovesAfterIndex: number
 ) => {
   try {
-    const response = await fetch(`${BASE_URL}/moves`, {
+    const response = await fetch(`${WS_URL}/moves`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 

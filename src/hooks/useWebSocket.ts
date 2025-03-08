@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
 
-const SOCKET_URL = "ws://localhost:8080/ws/game";
+const WS_URL = import.meta.env.VITE_WS_URL;
 
 export const useWebSocket = () => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -9,7 +9,7 @@ export const useWebSocket = () => {
 
     useEffect(() => {
         console.log("🔌 Tentando conectar ao WebSocket...");
-        const ws = new ReconnectingWebSocket(SOCKET_URL);
+        const ws = new ReconnectingWebSocket(WS_URL);
 
         ws.onopen = () => {
             console.log("✅ Conectado ao WebSocket!");
