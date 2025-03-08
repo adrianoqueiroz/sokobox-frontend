@@ -31,7 +31,7 @@ const Player: React.FC<PlayerProps> = ({ row, col, direction, cellSize }) => {
     const timer = setTimeout(() => {
       clearInterval(interval);
     //   setCurrentFrame(1); // força o idle no final
-    }, 100);
+    }, 250);
     return () => {
       clearInterval(interval);
       clearTimeout(timer);

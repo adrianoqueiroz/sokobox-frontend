@@ -1,7 +1,7 @@
 import React from 'react';
 import { TerrainType, ObjectType, MovedObject } from '../../types/GameTypes';
 import Player from '../Player/Player';
-import Mover from '../Mover/Mover'; // Nosso componente genérico para objetos em movimento
+import MovingObject from '../MovingObject/MovingObject';
 import './Board.css';
 
 const CELL_SIZE = 50;
@@ -83,10 +83,7 @@ const Board: React.FC<BoardProps> = ({
                   top: rowIndex * CELL_SIZE,
                   left: colIndex * CELL_SIZE,
                 }}
-              >
-                {/* Você pode renderizar um símbolo se quiser, por exemplo, para caixa: */}
-                {/* {objectType === 'BOX' ? '📦' : ''} */}
-              </div>
+              />
             );
           }
           return null;
@@ -96,17 +93,18 @@ const Board: React.FC<BoardProps> = ({
       {/* Camada 3: Objetos animados */}
       {animatingObjects.map((obj, index) =>
         obj.type !== 'PLAYER' ? (
-          <Mover
-            key={index}
-            imageUrl={obj.type === 'BOX' ? '/assets/box.png' : ''}
+          <MovingObject
+            key={`anim-${index}`}
             from={{ row: obj.fromRow, col: obj.fromCol }}
             to={{ row: obj.toRow, col: obj.toCol }}
             cellSize={CELL_SIZE}
+            imageUrl={obj.type === 'BOX' ? '/assets/box.png' : ''}
             useTransition={true}
             transitionDuration={300}
           />
         ) : null
       )}
+
 
       {/* Camada 4: Player */}
       <Player
