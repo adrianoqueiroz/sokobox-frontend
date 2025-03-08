@@ -3,7 +3,7 @@ import Sidebar from '../components/Sidebar/Sidebar';
 import { getLatestSession, restartSession, getPhases } from '../services/sessionService';
 import { TerrainType, ObjectType, MoveDirection, MovedObject } from '../types/GameTypes';
 import { useWebSocket } from '../hooks/useWebSocket';
-import SwipeableBoard from '../components/SwipeableBoard/Swipeableboard';
+import SwipeableBoard from '../components/SwipeableBoard/SwipeableBoard';
 import './Game.css';
 
 const Game: React.FC = () => {

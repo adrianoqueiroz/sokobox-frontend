@@ -8,7 +8,6 @@
   box-shadow: inset 0 0 0 4px rgba(34, 35, 37, 0.67);
   border-radius: 10px;
   box-shadow: inset 0 0 0 4px rgba(34, 35, 37, 0.67), 0 5px 20px rgba(34, 36, 39, 0.67);
-
 }
 
 .board-row {
@@ -51,6 +50,7 @@
   font-weight: bold;
   transition: transform 0.2s ease-out;
   background-color: transparent; /* Remove fundo sólido */
+  z-index: 3;
 }
 
 /* 🔹 Estilos para a Caixa */
@@ -61,6 +61,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+  z-index: 2; /* Acima do piso (z-index: 1) */
 }
 
 
@@ -69,6 +70,7 @@
   background-image: url('/assets/wall.png'); /* Caminho da imagem */
   background-size: cover; /* Garante que a imagem ocupe todo o espaço */
   background-position: center;
+  z-index: 1; /* Sempre por baixo dos objetos */
 }
 
 .terrain-floor, .terrain-destination { 
@@ -78,6 +80,7 @@
 
   box-shadow: 0px 0px 0px 0.3px black; 
   border-radius: 1px;
+  z-index: 1; /* Sempre por baixo dos objetos */
 }
 
 /* 🔹 Animação para o destino */
@@ -94,4 +97,69 @@
 .fade-out {
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
+}
+
+//* --- Efeito de Destino --- */
+
+/* Overlay para as células de destino */
+.destination-slot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 90%;
+  height: 90%;
+  transform: translate(5%, 5%);
+  z-index: 2; /* Fica acima do piso, mas abaixo dos objetos */
+  pointer-events: none;
+}
+
+/* Estado padrão: glow vermelho pulsante + borda tracejada */
+.destination-slot::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 70%;
+  height: 70%;
+  transform: translate(-50%, -50%);
+  border: 2px dashed rgba(255, 0, 0, 0.5);
+  border-radius: 5px;
+  background-color: rgba(255, 0, 0, 0.3);
+  box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+  z-index: 3;
+  animation: destination-glow 1.5s infinite alternate ease-in-out;
+}
+
+/* Animação do glow vermelho */
+@keyframes destination-glow {
+  0% {
+    transform: translate(-50%, -50%) scale(0.95);
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.6);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.95);
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.6);
+    opacity: 0.8;
+  }
+}
+
+/* Quando a caixa está posicionada no destino, altera para glow verde com maior tamanho e borda */
+.destination-slot.box-on-top::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 25px rgba(0, 255, 0, 1); /* Glow verde mais intenso */
+  border: 3px solid rgba(0, 255, 0, 0.6); /* Borda verde */
+  border-radius: 5px;
+  z-index: 3; /* Fica acima da caixa, se necessário */
 }

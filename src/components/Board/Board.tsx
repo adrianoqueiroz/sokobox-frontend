@@ -1,5 +1,5 @@
 import React from 'react';
-import { TerrainType, ObjectType, MovedObject } from '../../types/GameTypes';
+import { TerrainType, ObjectType, MovedObject, MoveDirection } from '../../types/GameTypes';
 import Player from '../Player/Player';
 import MovingObject from '../MovingObject/MovingObject';
 import FixedObject from '../FixedObject/FixedObject';
@@ -50,19 +50,26 @@ const Board: React.FC<BoardProps> = ({
                 position: 'relative',
               }}
             >
-              <div
-                className={`cell-terrain terrain-${terrainType.toLowerCase()} ${
-                  terrainType === 'DESTINATION' ? 'destination-active' : ''
-                }`}
-              >
-                {terrainType === 'DESTINATION' ? '❌' : ''}
-              </div>
+              <div className={`cell-terrain terrain-${terrainType.toLowerCase()}`} />
+              {/* Camada de destino: se for DESTINATION */}
+              {terrainType === 'DESTINATION' && (
+                <div
+                  className={`destination-slot ${objects[rowIndex][colIndex] === 'BOX' ? 'box-on-top' : ''}`}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                  }}
+                />
+              )}
             </div>
           ))}
         </div>
       ))}
 
-      {/* Camada 2: Objetos estáticos (exceto PLAYER) – iterando sobre objects */}
+      {/* Camada 2: Objetos estáticos (FixedObject) – renderizados quando não estão animados */}
       {objects.map((row, rowIndex) =>
         row.map((objectType, colIndex) => {
           if (objectType === 'NONE' || objectType === 'PLAYER') return null;
@@ -71,18 +78,13 @@ const Board: React.FC<BoardProps> = ({
             (anim) => anim.toRow === rowIndex && anim.toCol === colIndex
           );
           if (!isAnimating) {
-            // Verifica se a caixa está sobre um destino
-            const destinationActive =
-              objectType === 'BOX' && terrain[rowIndex][colIndex] === 'DESTINATION';
             const imageUrl = objectType === 'BOX' ? '/assets/box.png' : '';
             return (
               <FixedObject
                 key={`fixed-${rowIndex}-${colIndex}`}
-                objectType={objectType}
-                cellSize={CELL_SIZE}
                 imageUrl={imageUrl}
+                cellSize={CELL_SIZE}
                 from={{ row: rowIndex, col: colIndex }}
-                destinationActive={destinationActive}
               />
             );
           }

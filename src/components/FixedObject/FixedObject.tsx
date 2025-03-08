@@ -1,35 +1,36 @@
 import React from 'react';
 import './FixedObject.css';
 
-interface FixedObjectProps {
-  objectType: string;
-  cellSize: number;
-  imageUrl: string;
-  from: { row: number; col: number };
-  destinationActive?: boolean;
+interface Coordinates {
+  row: number;
+  col: number;
 }
 
-const FixedObject: React.FC<FixedObjectProps> = ({ objectType, cellSize, imageUrl, from, destinationActive = false }) => {
+interface FixedObjectProps {
+  imageUrl: string;
+  from: Coordinates;
+  cellSize: number;
+}
+
+const FixedObject: React.FC<FixedObjectProps> = ({ imageUrl, from, cellSize }) => {
   const round = (value: number) => Math.round(value);
   const top = round(from.row * cellSize);
   const left = round(from.col * cellSize);
 
   return (
     <div
-      className={`fixed-object object-${objectType.toLowerCase()} ${destinationActive ? 'destination-active' : ''}`}
+      className="fixed-object"
       style={{
         position: 'absolute',
         width: cellSize,
         height: cellSize,
         top: `${top}px`,
         left: `${left}px`,
-        background: imageUrl ? `url(${imageUrl}) no-repeat center` : '#ccc',
-        backgroundSize: 'contain',
+        background: `url(${imageUrl}) no-repeat center`,
+        backgroundSize: '100% 100%',
+        zIndex: 4, // Acima do overlay de destino (z-index: 2 ou 3)
       }}
-    >
-      {/* Fallback: mostra o nome do objeto */}
-      {!imageUrl && <span>{objectType}</span>}
-    </div>
+    />
   );
 };
 
