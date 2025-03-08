@@ -2,6 +2,7 @@ import React from 'react';
 import { TerrainType, ObjectType, MovedObject } from '../../types/GameTypes';
 import Player from '../Player/Player';
 import MovingObject from '../MovingObject/MovingObject';
+import FixedObject from '../FixedObject/FixedObject';
 import './Board.css';
 
 const CELL_SIZE = 50;
@@ -64,28 +65,24 @@ const Board: React.FC<BoardProps> = ({
       {/* Camada 2: Objetos estáticos (exceto PLAYER) – iterando sobre objects */}
       {objects.map((row, rowIndex) =>
         row.map((objectType, colIndex) => {
-          // Se não houver objeto ou se for PLAYER, não renderiza nada
           if (objectType === 'NONE' || objectType === 'PLAYER') return null;
           // Verifica se há um objeto animado nessa célula
-          const isAnimatingDestination = animatingObjects.some(
-            (obj) => obj.toRow === rowIndex && obj.toCol === colIndex
+          const isAnimating = animatingObjects.some(
+            (anim) => anim.toRow === rowIndex && anim.toCol === colIndex
           );
-          if (!isAnimatingDestination) {
+          if (!isAnimating) {
+            // Verifica se a caixa está sobre um destino
+            const destinationActive =
+              objectType === 'BOX' && terrain[rowIndex][colIndex] === 'DESTINATION';
+            const imageUrl = objectType === 'BOX' ? '/assets/box.png' : '';
             return (
-              <div
-                key={`object-${rowIndex}-${colIndex}`}
-                className={`cell-object object-${objectType.toLowerCase()} ${
-                  objectType === 'BOX' && terrain[rowIndex][colIndex] === 'DESTINATION'
-                    ? 'destination-active'
-                    : ''
-                }`}
-                style={{
-                  position: 'absolute',
-                  width: CELL_SIZE,
-                  height: CELL_SIZE,
-                  top: rowIndex * CELL_SIZE,
-                  left: colIndex * CELL_SIZE,
-                }}
+              <FixedObject
+                key={`fixed-${rowIndex}-${colIndex}`}
+                objectType={objectType}
+                cellSize={CELL_SIZE}
+                imageUrl={imageUrl}
+                from={{ row: rowIndex, col: colIndex }}
+                destinationActive={destinationActive}
               />
             );
           }
