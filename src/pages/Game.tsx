@@ -121,12 +121,15 @@ const Game: React.FC = () => {
     const move = moveQueue[0];
     setIsMoving(true);
 
-    // Envia o movimento pelo WebSocket
-    sendMoveWS(sessionId, move, currentMoveIndex);
+    // Se currentMoveIndex for 0 (ou seja, sem movimentos anteriores), envia -1 para indicar que não há índice válido.
+    const resetIndex = currentMoveIndex === 0 ? -1 : currentMoveIndex;
+    sendMoveWS(sessionId, move, resetIndex);
 
     // Remove o movimento enviado da fila
     setMoveQueue((prevQueue) => prevQueue.slice(1));
+
   }, [sessionId, moveQueue, isMoving, isProcessingQueue, sendMoveWS, currentMoveIndex]);
+
 
   // Atualiza o estado do jogo a partir do gameState recebido via WebSocket
 // Atualiza o estado do jogo a partir do gameState recebido via WebSocket
@@ -164,7 +167,7 @@ useEffect(() => {
         setAnimatingObjects([]);
         setIsMoving(false);
         setIsProcessingQueue(false);
-      }, 280);
+      }, 220);
     } else {
       // Se não houver animação, libera imediatamente
       setIsMoving(false);
