@@ -38,10 +38,10 @@ const Board: React.FC<BoardProps> = ({
     >
       {/* Camada 1: Terreno */}
       {terrain.map((row, rowIndex) => (
-        <div key={rowIndex} className="board-row">
+        <div key={`terrain-${rowIndex}`} className="board-row">
           {row.map((terrainType, colIndex) => (
             <div
-              key={colIndex}
+              key={`terrain-cell-${rowIndex}-${colIndex}`}
               className="cell"
               style={{
                 width: CELL_SIZE,
@@ -61,25 +61,28 @@ const Board: React.FC<BoardProps> = ({
         </div>
       ))}
 
-      {/* Camada 2: Objetos estáticos (exceto PLAYER) */}
-      {terrain.map((row, rowIndex) =>
-        row.map((_, colIndex) => {
-          const objectType = objects[rowIndex]?.[colIndex] || 'NONE';
+      {/* Camada 2: Objetos estáticos (exceto PLAYER) – iterando sobre objects */}
+      {objects.map((row, rowIndex) =>
+        row.map((objectType, colIndex) => {
+          // Se não houver objeto ou se for PLAYER, não renderiza nada
+          if (objectType === 'NONE' || objectType === 'PLAYER') return null;
           // Verifica se há um objeto animado nessa célula
           const isAnimatingDestination = animatingObjects.some(
             (obj) => obj.toRow === rowIndex && obj.toCol === colIndex
           );
-          if (objectType !== 'NONE' && objectType !== 'PLAYER' && !isAnimatingDestination) {
+          if (!isAnimatingDestination) {
             return (
               <div
-                key={`${rowIndex}-${colIndex}`}
+                key={`object-${rowIndex}-${colIndex}`}
                 className={`cell-object object-${objectType.toLowerCase()} ${
-                  objectType === 'BOX' ? 'destination-active' : ''
+                  objectType === 'BOX' && terrain[rowIndex][colIndex] === 'DESTINATION'
+                    ? 'destination-active'
+                    : ''
                 }`}
                 style={{
+                  position: 'absolute',
                   width: CELL_SIZE,
                   height: CELL_SIZE,
-                  position: 'absolute',
                   top: rowIndex * CELL_SIZE,
                   left: colIndex * CELL_SIZE,
                 }}
@@ -100,11 +103,10 @@ const Board: React.FC<BoardProps> = ({
             cellSize={CELL_SIZE}
             imageUrl={obj.type === 'BOX' ? '/assets/box.png' : ''}
             useTransition={true}
-            transitionDuration={300}
+            transitionDuration={200}
           />
         ) : null
       )}
-
 
       {/* Camada 4: Player */}
       <Player
