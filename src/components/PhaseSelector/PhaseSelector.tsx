@@ -20,7 +20,7 @@ const PhaseSelector: React.FC<PhaseSelectorProps> = ({
       <span className="phase-subtitle">{phaseName}</span>
       <div className="phase-selector">
         <ArrowButton direction="left" onClick={onPreviousPhase} />
-        <span className="phase-number">Fase {phaseNumber}</span>
+        <span className="phase-number">{phaseNumber}</span>
         <ArrowButton direction="right" onClick={onNextPhase} />
       </div>
     </div>

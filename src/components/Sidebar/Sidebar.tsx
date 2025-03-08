@@ -44,14 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         />
       </div>
 
-      <hr className="sidebar-divider" /> {/* 🔹 Linha separadora */}
-
-      <div className="sidebar-section">
-        <h3 className="section-title">Estatísticas</h3>
-        <StatsComponent movesCount={movesCount} timeElapsed={timeElapsed} />
-      </div>
-
-      <hr className="sidebar-divider" /> {/* 🔹 Linha separadora */}
+      <hr className="sidebar-divider" />
 
       <div className="sidebar-section">
         <h3 className="section-title">Histórico de Movimentos</h3>
@@ -64,7 +57,14 @@ const Sidebar: React.FC<SidebarProps> = ({
         />
       </div>
 
-      <hr className="sidebar-divider" /> {/* 🔹 Linha separadora */}
+      <hr className="sidebar-divider" />
+
+      <div className="sidebar-section">
+        <h3 className="section-title">Estatísticas</h3>
+        <StatsComponent timeElapsed={timeElapsed} attempts={1} /> {/* 🔹 Adicionado attempts */}
+      </div>
+
+      <hr className="sidebar-divider" />
 
       <button className="restart-button" onClick={onRestart}>
         🔄 Reiniciar

@@ -18,7 +18,7 @@
     padding: 4px 12px;
     border-radius: 5px; /* 🔹 Cantos arredondados para um visual mais suave */
     display: inline-block; /* 🔹 Evita que o fundo ocupe a largura total */
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
   
   /* 🔹 Container do seletor */
@@ -31,11 +31,12 @@
   
   /* 🔹 Número da fase centralizado */
   .phase-number {
-    font-size: 14px;
+    font-size: 18px; /* 🔹 Aumenta um pouco a fonte */
     font-weight: bold;
-    text-transform: uppercase;
-    min-width: 80px;
+    color: white;
+    text-shadow: 0px 0px 5px rgba(30, 31, 31, 0.5); /* 🔹 Efeito glow suave */
     text-align: center;
+    min-width: 50px; /* 🔹 Garante um espaço fixo para alinhamento */
   }
 
   .move-count {

@@ -2,14 +2,11 @@ import React from "react";
 import "./StatsComponent.css";
 
 interface StatsComponentProps {
-  movesCount: number;
   timeElapsed: number;
+  attempts: number; // 🔹 Novo parâmetro para tentativas
 }
 
-const StatsComponent: React.FC<StatsComponentProps> = ({
-  movesCount,
-  timeElapsed,
-}) => {
+const StatsComponent: React.FC<StatsComponentProps> = ({ timeElapsed, attempts }) => {
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -19,9 +16,9 @@ const StatsComponent: React.FC<StatsComponentProps> = ({
   return (
     <div className="stats-component">
       <div className="stats-item">
-        <span className="stats-icon">🔄</span>
-        <span className="stats-text">Movimentos:</span>
-        <span className="stats-value">{movesCount}</span>
+        <span className="stats-icon">🎯</span>
+        <span className="stats-text">Tentativas:</span>
+        <span className="stats-value">{attempts}</span>
       </div>
       <div className="stats-item">
         <span className="stats-icon">⏳</span>

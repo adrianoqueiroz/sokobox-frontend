@@ -7,7 +7,7 @@
     position: relative;
     display: inline-block;
     padding: 20px 40px 15px;
-    margin-bottom: 30px; /* 🔹 Aumentamos o espaçamento abaixo da logo */
+    margin-bottom: 25px; /* 🔹 Aumentamos o espaçamento abaixo da logo */
     text-align: center;
     white-space: nowrap;
   }
@@ -16,21 +16,21 @@
   /* 🚀 Foguete posicionado na frente do texto */
   .sokobox-logo::before {
     content: '🚀';
-    font-size: 25px;
+    font-size: 30px;
     position: absolute;
-    left: 12px;
-    top: 50%;
+    left: 10px;
+    top: 55%;
     transform: translateY(-50%);
-    animation: fire-rocket 0.8s infinite alternate;
+    animation: fire-rocket 1.2s infinite alternate;
   }
   
   /* 🔥 Animação do foguete mexendo levemente */
   @keyframes fire-rocket {
     0% {
-      transform: translateY(-50%) rotate(0deg);
+      transform: translateY(-50%) rotate(-30deg);
     }
     100% {
-      transform: translateY(-30%) rotate(-15deg);
+      transform: translateY(-50%) rotate(-60deg);
     }
   }
   
@@ -39,26 +39,14 @@
     content: '';
     position: absolute;
     left: 50%;
-    bottom: -10px;
-    width: 115%;
-    height: 20px;
-    background: radial-gradient(circle, orange 20%, transparent 80%);
+    bottom: 0px;
+    width: 85%;
+    height: 5px;
+    background: radial-gradient(circle, orange 100%, transparent 100%);
     opacity: 0.9;
-    filter: blur(5px);
+    filter: blur(1px);
     transform: translateX(-50%);
     border-radius: 50%;
-    animation: fire-trail 1.2s infinite alternate;
-  }
-  
-  /* 🔥 Animação do rastro pulsando suavemente */
-  @keyframes fire-trail {
-    0% {
-      opacity: 0.9;
-      transform: translateX(-50%) scale(1);
-    }
-    100% {
-      opacity: 0.6;
-      transform: translateX(-50%) scale(1.1);
-    }
+
   }
   
