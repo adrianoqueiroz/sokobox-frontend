@@ -1,6 +1,9 @@
-import React from 'react';
-import './Sidebar.css';
-import PhaseNavigation from '../PhaseNavigation/PhaseNavigation';
+import React from "react";
+import "./Sidebar.css";
+import PhaseSelector from "../PhaseSelector/PhaseSelector";
+import MoveSelector from "../MoveSelector/MoveSelector";
+import StatsComponent from "../StatsComponent/StatsComponent";
+import SokoBoxLogo from "../SokoBoxLogo/SokoBoxLogo";
 
 interface SidebarProps {
   movesCount: number;
@@ -9,10 +12,10 @@ interface SidebarProps {
   phaseName: string;
   onPreviousPhase: () => void;
   onNextPhase: () => void;
-  onUndoMove: () => void;  // 🔹 Novo botão para voltar movimento
-  onRedoMove: () => void;  // 🔹 Novo botão para refazer movimento
-  canUndo: boolean;  // 🔹 Verifica se pode retroceder
-  canRedo: boolean;  // 🔹 Verifica se pode avançar
+  onUndoMove: () => void;
+  onRedoMove: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -25,49 +28,47 @@ const Sidebar: React.FC<SidebarProps> = ({
   onUndoMove,
   onRedoMove,
   canUndo,
-  canRedo
+  canRedo,
 }) => {
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
   return (
     <div className="game-sidebar">
-      <h1 className="sokobox-logo">SokoBox</h1>
+      <SokoBoxLogo />
 
-      {/* 🔹 Navegação entre fases */}
-      <PhaseNavigation 
-        phaseName={phaseName} 
-        onPrevious={onPreviousPhase} 
-        onNext={onNextPhase} 
-      />
-      
-      {/* 🔹 Novo bloco de estatísticas estilizado */}
-      <div className="stats-container">
-        <h2>Estatísticas</h2>
-        <div className="stats-item">
-          <span className="stats-icon">🔄</span>
-          <span className="stats-text">Movimentos:</span>
-          <span className="stats-value">{movesCount}</span>
-        </div>
-        <div className="stats-item">
-          <span className="stats-icon">⏳</span>
-          <span className="stats-text">Tempo:</span>
-          <span className="stats-value">{formatTime(timeElapsed)}</span>
-        </div>
+      <div className="sidebar-section">
+        <h3 className="section-title">Selecionar Fase</h3>
+        <PhaseSelector
+          phaseName={phaseName}
+          phaseNumber={1}
+          onPreviousPhase={onPreviousPhase}
+          onNextPhase={onNextPhase}
+        />
       </div>
 
-      {/* 🔹 Navegação entre movimentos */}
-      <div className="move-navigation">
-        <button className="move-button prev" onClick={onUndoMove} disabled={!canUndo}>‹</button>
-        <span className="move-label">Movimentos</span>
-        <button className="move-button next" onClick={onRedoMove} disabled={!canRedo}>›</button>
+      <hr className="sidebar-divider" /> {/* 🔹 Linha separadora */}
+
+      <div className="sidebar-section">
+        <h3 className="section-title">Estatísticas</h3>
+        <StatsComponent movesCount={movesCount} timeElapsed={timeElapsed} />
       </div>
 
-      {/* 🔹 Botão de reiniciar estilizado */}
-      <button className="restart-button" onClick={onRestart}>🔄 Reiniciar</button>
+      <hr className="sidebar-divider" /> {/* 🔹 Linha separadora */}
+
+      <div className="sidebar-section">
+        <h3 className="section-title">Histórico de Movimentos</h3>
+        <MoveSelector
+          movesCount={movesCount}
+          onUndoMove={onUndoMove}
+          onRedoMove={onRedoMove}
+          canUndo={canUndo}
+          canRedo={canRedo}
+        />
+      </div>
+
+      <hr className="sidebar-divider" /> {/* 🔹 Linha separadora */}
+
+      <button className="restart-button" onClick={onRestart}>
+        🔄 Reiniciar
+      </button>
     </div>
   );
 };

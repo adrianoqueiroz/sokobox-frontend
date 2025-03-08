@@ -1,0 +1,49 @@
+.phase-selector-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  /* 🔹 Nome da fase destacado */
+/* 🔹 Nome da fase agora com melhor contraste e sem efeito estourado */
+.phase-subtitle {
+    font-size: 15px; /* 🔹 Tamanho reduzido para melhor legibilidade */
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7); /* 🔹 Sombra sutil para contraste */
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5); /* 🔹 Fundo translúcido para destacar */
+    padding: 4px 12px;
+    border-radius: 5px; /* 🔹 Cantos arredondados para um visual mais suave */
+    display: inline-block; /* 🔹 Evita que o fundo ocupe a largura total */
+    margin-bottom: 6px;
+  }
+  
+  /* 🔹 Container do seletor */
+  .phase-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  /* 🔹 Número da fase centralizado */
+  .phase-number {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .move-count {
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7); 
+    min-width: 80px;
+    text-align: center;
+    color: white;
+  }
+  

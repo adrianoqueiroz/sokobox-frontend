@@ -1,0 +1,25 @@
+.move-selector-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  
+  /* 🔹 Container dos botões */
+  .move-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  /* 🔹 Número de movimentos centralizado */
+  .move-count {
+    min-width: 50px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+  }
+  

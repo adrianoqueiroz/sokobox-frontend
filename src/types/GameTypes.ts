@@ -21,14 +21,13 @@ export enum MoveDirection {
 }
 
 export type MovedObject = {
-    type: ObjectType;
-    fromRow: number;
-    fromCol: number;
-    toRow: number;
-    toCol: number;
-    progress: number; // ✅ Progresso da animação
-};
-
+  type: ObjectType
+  fromRow: number
+  fromCol: number
+  toRow: number
+  toCol: number
+  progress: number // ✅ Progresso da animação
+}
 
 // Estrutura do movimento realizado
 export interface MoveRecord {

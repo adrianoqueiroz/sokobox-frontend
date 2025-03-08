@@ -1,19 +1,24 @@
-import React from 'react';
-import { TerrainType, ObjectType, MovedObject, MoveDirection } from '../../types/GameTypes';
-import Player from '../Player/Player';
-import MovingObject from '../MovingObject/MovingObject';
-import FixedObject from '../FixedObject/FixedObject';
-import './Board.css';
+import React from 'react'
+import {
+  TerrainType,
+  ObjectType,
+  MovedObject,
+  MoveDirection,
+} from '../../types/GameTypes'
+import Player from '../Player/Player'
+import MovingObject from '../MovingObject/MovingObject'
+import FixedObject from '../FixedObject/FixedObject'
+import './Board.css'
 
-const CELL_SIZE = 50;
+const CELL_SIZE = 50
 
 interface BoardProps {
-  terrain: TerrainType[][];
-  objects: ObjectType[][];
-  animatingObjects: MovedObject[];
-  playerDirection: 'up' | 'down' | 'left' | 'right';
-  playerRow: number;
-  playerCol: number;
+  terrain: TerrainType[][]
+  objects: ObjectType[][]
+  animatingObjects: MovedObject[]
+  playerDirection: 'up' | 'down' | 'left' | 'right'
+  playerRow: number
+  playerCol: number
 }
 
 const Board: React.FC<BoardProps> = ({
@@ -25,7 +30,7 @@ const Board: React.FC<BoardProps> = ({
   playerCol,
 }) => {
   if (!terrain.length || !terrain[0].length) {
-    return <div className="board">Tabuleiro vazio ou inválido</div>;
+    return <div className="board">Tabuleiro vazio ou inválido</div>
   }
 
   return (
@@ -50,7 +55,9 @@ const Board: React.FC<BoardProps> = ({
                 position: 'relative',
               }}
             >
-              <div className={`cell-terrain terrain-${terrainType.toLowerCase()}`} />
+              <div
+                className={`cell-terrain terrain-${terrainType.toLowerCase()}`}
+              />
               {/* Camada de destino: se for DESTINATION */}
               {terrainType === 'DESTINATION' && (
                 <div
@@ -72,13 +79,13 @@ const Board: React.FC<BoardProps> = ({
       {/* Camada 2: Objetos estáticos (FixedObject) – renderizados quando não estão animados */}
       {objects.map((row, rowIndex) =>
         row.map((objectType, colIndex) => {
-          if (objectType === 'NONE' || objectType === 'PLAYER') return null;
+          if (objectType === 'NONE' || objectType === 'PLAYER') return null
           // Verifica se há um objeto animado nessa célula
           const isAnimating = animatingObjects.some(
-            (anim) => anim.toRow === rowIndex && anim.toCol === colIndex
-          );
+            (anim) => anim.toRow === rowIndex && anim.toCol === colIndex,
+          )
           if (!isAnimating) {
-            const imageUrl = objectType === 'BOX' ? '/assets/box.png' : '';
+            const imageUrl = objectType === 'BOX' ? '/assets/box.png' : ''
             return (
               <FixedObject
                 key={`fixed-${rowIndex}-${colIndex}`}
@@ -86,10 +93,10 @@ const Board: React.FC<BoardProps> = ({
                 cellSize={CELL_SIZE}
                 from={{ row: rowIndex, col: colIndex }}
               />
-            );
+            )
           }
-          return null;
-        })
+          return null
+        }),
       )}
 
       {/* Camada 3: Objetos animados */}
@@ -104,7 +111,7 @@ const Board: React.FC<BoardProps> = ({
             useTransition={true}
             transitionDuration={200}
           />
-        ) : null
+        ) : null,
       )}
 
       {/* Camada 4: Player */}
@@ -115,7 +122,7 @@ const Board: React.FC<BoardProps> = ({
         cellSize={CELL_SIZE}
       />
     </div>
-  );
-};
+  )
+}
 
-export default Board;
+export default Board

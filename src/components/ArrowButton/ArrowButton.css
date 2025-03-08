@@ -1,0 +1,32 @@
+.arrow-button {
+    background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+    border: 2px solid cyan;
+    color: cyan;
+    font-family: "Orbitron", sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 2px 2px 5px rgba(0, 255, 255, 0.3);
+  }
+  
+  .arrow-button:hover {
+    background: #00cccc;
+    color: black;
+    border-color: white;
+    box-shadow: 2px 2px 10px rgba(0, 255, 255, 0.6);
+  }
+  
+  .arrow-button:active {
+    transform: scale(0.95);
+  }
+  
+  .arrow-button:disabled {
+    color: gray;
+    border-color: gray;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  

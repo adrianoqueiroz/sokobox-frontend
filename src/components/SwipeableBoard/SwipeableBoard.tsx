@@ -1,17 +1,17 @@
-import React from 'react';
-import { useSwipeable } from 'react-swipeable';
-import Board from '../Board/Board';
-import { MoveDirection } from '../../types/GameTypes';
+import React from 'react'
+import { useSwipeable } from 'react-swipeable'
+import Board from '../Board/Board'
+import { MoveDirection } from '../../types/GameTypes'
 
 interface SwipeableBoardProps {
-  onSwipe: (direction: MoveDirection) => void;
+  onSwipe: (direction: MoveDirection) => void
   // Todas as props que o Board espera:
-  terrain: any[][]; // ou TerrainType[][]
-  objects: any[][]; // ou ObjectType[][]
-  animatingObjects: any[]; // ou MovedObject[]
-  playerDirection: 'up' | 'down' | 'left' | 'right';
-  playerRow: number;
-  playerCol: number;
+  terrain: any[][] // ou TerrainType[][]
+  objects: any[][] // ou ObjectType[][]
+  animatingObjects: any[] // ou MovedObject[]
+  playerDirection: 'up' | 'down' | 'left' | 'right'
+  playerRow: number
+  playerCol: number
 }
 
 const SwipeableBoard: React.FC<SwipeableBoardProps> = ({
@@ -25,13 +25,13 @@ const SwipeableBoard: React.FC<SwipeableBoardProps> = ({
     onSwipedDown: () => onSwipe(MoveDirection.DOWN),
     preventScrollOnSwipe: true,
     trackMouse: true,
-  });
+  })
 
   return (
     <div {...handlers}>
       <Board {...boardProps} />
     </div>
-  );
-};
+  )
+}
 
-export default SwipeableBoard;
+export default SwipeableBoard

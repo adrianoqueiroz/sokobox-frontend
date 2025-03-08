@@ -1,21 +1,25 @@
-import React from 'react';
-import './FixedObject.css';
+import React from 'react'
+import './FixedObject.css'
 
 interface Coordinates {
-  row: number;
-  col: number;
+  row: number
+  col: number
 }
 
 interface FixedObjectProps {
-  imageUrl: string;
-  from: Coordinates;
-  cellSize: number;
+  imageUrl: string
+  from: Coordinates
+  cellSize: number
 }
 
-const FixedObject: React.FC<FixedObjectProps> = ({ imageUrl, from, cellSize }) => {
-  const round = (value: number) => Math.round(value);
-  const top = round(from.row * cellSize);
-  const left = round(from.col * cellSize);
+const FixedObject: React.FC<FixedObjectProps> = ({
+  imageUrl,
+  from,
+  cellSize,
+}) => {
+  const round = (value: number) => Math.round(value)
+  const top = round(from.row * cellSize)
+  const left = round(from.col * cellSize)
 
   return (
     <div
@@ -31,7 +35,7 @@ const FixedObject: React.FC<FixedObjectProps> = ({ imageUrl, from, cellSize }) =
         zIndex: 4, // Acima do overlay de destino (z-index: 2 ou 3)
       }}
     />
-  );
-};
+  )
+}
 
-export default FixedObject;
+export default FixedObject
