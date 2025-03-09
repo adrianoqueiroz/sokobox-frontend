@@ -1,0 +1,46 @@
+.number-selector-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* 🔹 Ajuste do título opcional */
+.number-selector-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7);
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+/* 🔹 Alinhamento dos botões e número na mesma linha */
+.selector-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* 🔹 Espaço entre os botões e o número */
+}
+
+/* 🔹 Número centralizado dentro da caixa */
+.selector-number-box {
+  position: relative;
+  width: 50px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+/* 🔹 Estilização do número */
+.selector-number {
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+}

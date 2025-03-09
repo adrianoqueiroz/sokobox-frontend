@@ -237,13 +237,13 @@ const Game: React.FC = () => {
         movesCount={movesCount}
         timeElapsed={timeElapsed}
         onRestart={handleRestart}
-        phaseName={phases[phaseIndex]?.name || "Fase Desconhecida"}
-        onPreviousPhase={handlePreviousPhase}
-        onNextPhase={handleNextPhase}
-        onUndoMove={handleUndoMove}
-        onRedoMove={handleRedoMove}
-        canUndo={currentMoveIndex > 0}
-        canRedo={currentMoveIndex < moveQueue.length - 1}
+        phaseName={"Phase Name"}
+        phaseNumber={phaseIndex + 1} // 🔹 Convertendo índice para fase real
+        maxPhases={phases.length} // 🔹 Número total de fases disponíveis
+        onPhaseChange={(newPhase) => setPhaseIndex(newPhase - 1)} // 🔹 Atualiza a fase
+        moveHistoryIndex={currentMoveIndex}
+        maxMoves={moveQueue.length - 1}
+        onMoveChange={(newMove) => setCurrentMoveIndex(newMove)}
         skinIndex={skinIndex}
         onPreviousSkin={handlePreviousSkin}
         onNextSkin={handleNextSkin}
