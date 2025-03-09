@@ -19,8 +19,8 @@ const MovingObject: React.FC<MovingObjectProps> = ({
   from,
   to,
   cellSize,
-  useTransition = true,
-  transitionDuration = 300,
+  useTransition,
+  transitionDuration,
 }) => {
   const round = (value: number) => Math.round(value)
 

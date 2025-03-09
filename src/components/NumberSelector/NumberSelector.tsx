@@ -7,7 +7,7 @@ interface NumberSelectorProps {
   minValue: number;
   maxValue: number;
   onChange: (newValue: number) => void;
-  label?: string; // 🔹 Título opcional para exibir acima do seletor
+  label?: string;
 }
 
 const NumberSelector: React.FC<NumberSelectorProps> = ({

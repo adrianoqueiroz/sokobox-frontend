@@ -107,6 +107,7 @@ const Game: React.FC = () => {
     delta: 10,
   });
 
+  /** Encontra a posicao do player no jogo */
   const playerPosition: Position | null = useMemo(() => {
     const found = objects.flatMap((row, rowIndex) =>
       row.map((objectType, colIndex) =>
@@ -183,7 +184,6 @@ const Game: React.FC = () => {
   
         setAnimatingObjects(lastMove.movedObjects);
   
-        // ✅ ATUALIZA O ÍNDICE DO MOVIMENTO PARA O ÚLTIMO MOVIMENTO FEITO
         setCurrentMoveIndex(gameState.moves.length);
   
         setTimeout(() => {
@@ -197,39 +197,28 @@ const Game: React.FC = () => {
   }, [gameState]);
   
 
-  const handlePreviousPhase = () => {
-    setPhaseIndex((prev) => (prev > 0 ? prev - 1 : prev));
-  };
-  
-  const handleNextPhase = () => {
-    setPhaseIndex((prev) => (prev < phases.length - 1 ? prev + 1 : prev));
-  };
-  
-  const handleUndoMove = () => {
-    if (currentMoveIndex > 0) {
-      setCurrentMoveIndex(currentMoveIndex - 1);
-    }
-  };
-  
-  const handleRedoMove = () => {
-    if (currentMoveIndex < moveQueue.length - 1) {
-      setCurrentMoveIndex(currentMoveIndex + 1);
-    }
-  };
-
-  const handlePreviousSkin = () => {
-    setSkinIndex((prev) => (prev > 0 ? prev - 1 : 7));
-  };
-
-  const handleNextSkin = () => {
-    setSkinIndex((prev) => (prev < 7 ? prev + 1 : 0));
-  };
-
   const handleMoveChange = (newMove: number) => {
     if (newMove >= 0 && newMove <= movesCount) {
       setCurrentMoveIndex(newMove);
     }
+  };
+   
+
+  const handleSkinChange = (newSkinIndex: number) => {
+    if (newSkinIndex >= 0 && newSkinIndex < 8) { 
+      setSkinIndex(newSkinIndex);
+    }
   };  
+
+
+  const getOppositeDirection = (direction: Direction): Direction => {
+    switch (direction) {
+      case Direction.UP: return Direction.DOWN;
+      case Direction.DOWN: return Direction.UP;
+      case Direction.LEFT: return Direction.RIGHT;
+      case Direction.RIGHT: return Direction.LEFT;
+    }
+  };
 
   return (
     <div className="game-wrapper" {...swipeHandlers}>
@@ -247,20 +236,20 @@ const Game: React.FC = () => {
       </div>
 
       <Sidebar
-        movesCount={movesCount}
         timeElapsed={timeElapsed}
         onRestart={handleRestart}
         phaseName={"Phase Name"}
-        phaseNumber={phaseIndex + 1} 
-        maxPhases={phases.length} 
-        onPhaseChange={(newPhase) => setPhaseIndex(newPhase - 1)} 
+        phaseNumber={phaseIndex + 1}
+        maxPhases={phases.length}
+        onPhaseChange={(newPhase) => setPhaseIndex(newPhase - 1)}
         moveHistoryIndex={currentMoveIndex}
         maxMoves={movesCount}
         onMoveChange={handleMoveChange}
         skinIndex={skinIndex}
-        onPreviousSkin={handlePreviousSkin}
-        onNextSkin={handleNextSkin}
+        maxSkins={7}
+        onSkinChange={handleSkinChange}
       />
+
 
     </div>
   );

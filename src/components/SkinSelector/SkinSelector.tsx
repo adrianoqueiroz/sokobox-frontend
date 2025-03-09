@@ -4,36 +4,47 @@ import ArrowButton from "../ArrowButton/ArrowButton";
 
 interface SkinSelectorProps {
   skinIndex: number;
-  onPreviousSkin: () => void;
-  onNextSkin: () => void;
+  maxSkinValue: number;
+  onSkinChange: (newSkinIndex: number) => void;
 }
 
 const CELL_SIZE = 50;
 const SPRITE_WIDTH = 600;
 const SPRITE_HEIGHT = 400;
-const TOTAL_SKINS = 8;
 
-/** 🔹 Corrigido: Agora cada skin é posicionada corretamente no sprite */
 const getSpritePosition = (skinIndex: number) => {
   const row = Math.floor(skinIndex / 4) * 4; 
   const indexSprite = 1 + (skinIndex % 4) * 3;
   const col = indexSprite * CELL_SIZE ;
 
-  return `-${col+1}px -${row * CELL_SIZE}px`;
+  return `-${col}px -${row * CELL_SIZE}px`;
 };
 
 const SkinSelector: React.FC<SkinSelectorProps> = ({
   skinIndex,
-  onPreviousSkin,
-  onNextSkin,
+  maxSkinValue,
+  onSkinChange,
 }) => {
+
+    const handleDecrease = () => {
+      if (skinIndex > 0) {
+        onSkinChange(skinIndex - 1);
+      }
+    };
+  
+    const handleIncrease = () => {
+      if (skinIndex < maxSkinValue) {
+        onSkinChange(skinIndex + 1);
+      }
+    };
+
   return (
     <div className="skin-selector-container">
 
       <div className="skin-selector">
         <ArrowButton
           direction="left"
-          onClick={onPreviousSkin}
+          onClick={handleDecrease}
           disabled={skinIndex === 0}
         />
 
@@ -52,8 +63,8 @@ const SkinSelector: React.FC<SkinSelectorProps> = ({
 
         <ArrowButton
           direction="right"
-          onClick={onNextSkin}
-          disabled={skinIndex === TOTAL_SKINS - 1}
+          onClick={handleIncrease}
+          disabled={skinIndex === maxSkinValue}
         />
       </div>
     </div>

@@ -6,7 +6,6 @@ import SokoBoxLogo from "../SokoBoxLogo/SokoBoxLogo";
 import SkinSelector from "../SkinSelector/SkinSelector";
 
 interface SidebarProps {
-  movesCount: number;
   timeElapsed: number;
   onRestart: () => Promise<void>;
   phaseName: string;
@@ -17,12 +16,11 @@ interface SidebarProps {
   maxMoves: number;
   onMoveChange: (newMoveIndex: number) => void;
   skinIndex: number;
-  onPreviousSkin: () => void;
-  onNextSkin: () => void;
+  maxSkins: number;
+  onSkinChange: (newSkinIndex: number) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
-  movesCount,
   timeElapsed,
   onRestart,
   phaseName,
@@ -33,8 +31,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   maxMoves,
   onMoveChange,
   skinIndex,
-  onPreviousSkin,
-  onNextSkin,
+  maxSkins,
+  onSkinChange,
 }) => {
   return (
     <div className="game-sidebar">
@@ -44,8 +42,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         <h3 className="section-title">Skin</h3>
         <SkinSelector
           skinIndex={skinIndex}
-          onPreviousSkin={onPreviousSkin}
-          onNextSkin={onNextSkin}
+          maxSkinValue={maxSkins}
+          onSkinChange={onSkinChange}
         />
       </div>
 

@@ -18,19 +18,18 @@ const Player: React.FC<PlayerProps> = ({ position, direction, cellSize, skinInde
     [Direction.UP]: 3,
   }[direction]
 
-
   const spriteRow = baseRow + Math.floor(skinIndex / 4) * 4
   const spriteColOffset = (skinIndex % 4) * 3
   const bgPosition = `-${(spriteColOffset + currentFrame) * cellSize}px -${spriteRow * cellSize}px`
 
   useEffect(() => {
-    let animationFrames = [0, 1, 2, 1]
+    let animationFrames = [2, 0, 1]
     let frameIndex = 0
 
     const interval = setInterval(() => {
       setCurrentFrame(animationFrames[frameIndex])
       frameIndex = (frameIndex + 1) % animationFrames.length
-    }, 60)
+    }, 40)
 
     setTimeout(() => {
       clearInterval(interval)

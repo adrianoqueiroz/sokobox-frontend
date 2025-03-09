@@ -110,7 +110,7 @@ const Board: React.FC<BoardProps> = ({
             cellSize={CELL_SIZE}
             imageUrl={obj.type === 'BOX' ? '/assets/box.png' : ''}
             useTransition={true}
-            transitionDuration={200}
+            transitionDuration={240}
           />
         ) : null,
       )}

@@ -24,7 +24,7 @@ export enum ObjectType {
 }
 
 export interface Move {
-  direction: "UP" | "DOWN" | "LEFT" | "RIGHT";
+  direction: Direction;
   movedObjects: MovedObject[];
 }
 
