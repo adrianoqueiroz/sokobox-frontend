@@ -4,6 +4,7 @@ import PhaseSelector from "../PhaseSelector/PhaseSelector";
 import MoveSelector from "../MoveSelector/MoveSelector";
 import StatsComponent from "../StatsComponent/StatsComponent";
 import SokoBoxLogo from "../SokoBoxLogo/SokoBoxLogo";
+import SkinSelector from "../SkinSelector/SkinSelector";
 
 interface SidebarProps {
   movesCount: number;
@@ -16,6 +17,9 @@ interface SidebarProps {
   onRedoMove: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  skinIndex: number;
+  onPreviousSkin: () => void;
+  onNextSkin: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -29,13 +33,27 @@ const Sidebar: React.FC<SidebarProps> = ({
   onRedoMove,
   canUndo,
   canRedo,
+  skinIndex,
+  onPreviousSkin,
+  onNextSkin,
 }) => {
   return (
     <div className="game-sidebar">
       <SokoBoxLogo />
 
       <div className="sidebar-section">
-        <h3 className="section-title">Selecionar Fase</h3>
+        <h3 className="section-title">Skin</h3>
+        <SkinSelector
+          skinIndex={skinIndex}
+          onPreviousSkin={onPreviousSkin}
+          onNextSkin={onNextSkin}
+        />
+      </div>
+
+      <hr className="sidebar-divider" />
+      
+      <div className="sidebar-section">
+        <h3 className="section-title">Fase</h3>
         <PhaseSelector
           phaseName={phaseName}
           phaseNumber={1}
@@ -47,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <hr className="sidebar-divider" />
 
       <div className="sidebar-section">
-        <h3 className="section-title">Histórico de Movimentos</h3>
+        <h3 className="section-title">Movimentos</h3>
         <MoveSelector
           movesCount={movesCount}
           onUndoMove={onUndoMove}

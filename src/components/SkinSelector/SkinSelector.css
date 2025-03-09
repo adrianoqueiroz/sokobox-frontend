@@ -1,0 +1,41 @@
+.skin-selector-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+  }
+  
+  .skin-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+  }
+  
+  .skin-preview-container {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .skin-preview-floor {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: url('/assets/floor4.png');
+    background-size: cover;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+  
+  .skin-preview {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+  }
+  

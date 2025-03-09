@@ -22,6 +22,7 @@ const Game: React.FC = () => {
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [playerDirection, setPlayerDirection] = useState<Direction>(Direction.DOWN);
+  const [skinIndex, setSkinIndex] = useState(0);
 
   const { gameState, sendMove: sendMoveWS } = useWebSocket();
 
@@ -51,7 +52,7 @@ const Game: React.FC = () => {
     fetchGameData();
   }, []);
 
-  /** 🔹 Atualiza o tempo de jogo */
+  /** Atualiza o tempo de jogo */
   useEffect(() => {
     if (!sessionStartTime) return;
 
@@ -60,13 +61,13 @@ const Game: React.FC = () => {
       setTimeElapsed(Math.floor((now.getTime() - sessionStartTime.getTime()) / 1000));
     };
 
-    updateTime(); // Atualiza imediatamente
+    updateTime();
 
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, [sessionStartTime]);
 
-  /** 🔹 Captura eventos de teclado */
+  /** Captura eventos de teclado */
   useEffect(() => {
     if (!currentSession) return;
 
@@ -90,7 +91,7 @@ const Game: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [currentSession, isProcessing]);
 
-  /** 🔹 Captura eventos de Swipe */
+  /** Captura eventos de Swipe */
   const handleSwipe = useCallback((direction: Direction) => {
     if (!currentSession) return;
     setMoveQueue((prevQueue) => [...prevQueue, direction]);
@@ -106,18 +107,17 @@ const Game: React.FC = () => {
     delta: 10,
   });
 
-  /** 🔹 Encontra a posição do player no mapa */
   const playerPosition: Position | null = useMemo(() => {
-    for (let row = 0; row < objects.length; row++) {
-      const col = objects[row].indexOf(ObjectType.PLAYER);
-      if (col !== -1) return { row, col };
-    }
-    return { row: 0, col: 0 }; // Posição padrão caso não encontre
+    const found = objects.flatMap((row, rowIndex) =>
+      row.map((objectType, colIndex) =>
+        objectType === ObjectType.PLAYER ? { row: rowIndex, col: colIndex } : null
+      )
+    ).find((pos) => pos !== null);
+  
+    return found ?? { row: 0, col: 0 };
   }, [objects]);
-  
-  
 
-  /** 🔹 Reinicia o jogo */
+  /** Reinicia o jogo */
   const handleRestart = async () => {
     if (!currentSession) return;
 
@@ -189,6 +189,35 @@ const Game: React.FC = () => {
     }
   }, [gameState]);
 
+  const handlePreviousPhase = () => {
+    setPhaseIndex((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+  
+  const handleNextPhase = () => {
+    setPhaseIndex((prev) => (prev < phases.length - 1 ? prev + 1 : prev));
+  };
+  
+  const handleUndoMove = () => {
+    if (currentMoveIndex > 0) {
+      setCurrentMoveIndex(currentMoveIndex - 1);
+    }
+  };
+  
+  const handleRedoMove = () => {
+    if (currentMoveIndex < moveQueue.length - 1) {
+      setCurrentMoveIndex(currentMoveIndex + 1);
+    }
+  };
+
+  const handlePreviousSkin = () => {
+    setSkinIndex((prev) => (prev > 0 ? prev - 1 : 7));
+  };
+
+  const handleNextSkin = () => {
+    setSkinIndex((prev) => (prev < 7 ? prev + 1 : 0));
+  };
+
+
   return (
     <div className="game-wrapper" {...swipeHandlers}>
       <div className="game-container">
@@ -199,6 +228,7 @@ const Game: React.FC = () => {
           animatingObjects={animatingObjects} 
           playerDirection={playerDirection} 
           playerPosition={playerPosition}
+          skinIndex={skinIndex}
           onSwipe={handleSwipe} 
          />}
       </div>
@@ -207,13 +237,16 @@ const Game: React.FC = () => {
         movesCount={movesCount}
         timeElapsed={timeElapsed}
         onRestart={handleRestart}
-        phaseName={phases[phaseIndex]?.name || 'Fase Desconhecida'}
-        onPreviousPhase={() => setPhaseIndex((prev) => Math.max(0, prev - 1))}
-        onNextPhase={() => setPhaseIndex((prev) => Math.min(phases.length - 1, prev + 1))}
-        onUndoMove={() => setCurrentMoveIndex((prev) => Math.max(0, prev - 1))}
-        onRedoMove={() => setCurrentMoveIndex((prev) => Math.min(moveQueue.length - 1, prev + 1))}
+        phaseName={phases[phaseIndex]?.name || "Fase Desconhecida"}
+        onPreviousPhase={handlePreviousPhase}
+        onNextPhase={handleNextPhase}
+        onUndoMove={handleUndoMove}
+        onRedoMove={handleRedoMove}
         canUndo={currentMoveIndex > 0}
         canRedo={currentMoveIndex < moveQueue.length - 1}
+        skinIndex={skinIndex}
+        onPreviousSkin={handlePreviousSkin}
+        onNextSkin={handleNextSkin}
       />
 
     </div>

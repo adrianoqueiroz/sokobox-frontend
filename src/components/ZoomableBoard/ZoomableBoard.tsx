@@ -10,6 +10,7 @@ interface ZoomableBoardProps {
   animatingObjects: any[];
   playerDirection: Direction;
   playerPosition: Position;
+  skinIndex: number;
 }
 
 const ZoomableBoard: React.FC<ZoomableBoardProps> = ({ onSwipe, ...boardProps }) => {

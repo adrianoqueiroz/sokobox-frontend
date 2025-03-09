@@ -19,6 +19,7 @@ interface BoardProps {
   animatingObjects: MovedObject[]
   playerDirection: Direction
   playerPosition: Position
+  skinIndex: number
 }
 
 const Board: React.FC<BoardProps> = ({
@@ -27,6 +28,7 @@ const Board: React.FC<BoardProps> = ({
   animatingObjects,
   playerDirection,
   playerPosition,
+  skinIndex,
 }) => {
   if (!terrain.length || !terrain[0].length) {
     return <div className="board">Tabuleiro vazio ou inválido</div>
@@ -118,7 +120,7 @@ const Board: React.FC<BoardProps> = ({
         position={playerPosition} 
         direction={playerDirection} 
         cellSize={CELL_SIZE} 
-        skinIndex={3}
+        skinIndex={skinIndex}
       />
     </div>
   )
