@@ -18,9 +18,8 @@
   right: 0;
 }
 
-/* 🔹 Definição única para todos os títulos */
 .section-title {
-  background: rgba(0, 0, 0, 0.6); /* 🔹 Fundo translúcido restaurado */
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 6px;
   font-size: 14px;
   font-weight: bold;
@@ -31,11 +30,10 @@
   margin-bottom: 10px;
   width: 100%;
   padding: 5px 0;
-  border-bottom: 1px solid rgba(0, 255, 255, 0.3); /* 🔹 Linha sutil abaixo do título */
-  letter-spacing: 1px; /* 🔹 Melhora a separação das letras */
+  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+  letter-spacing: 1px;
 }
 
-/* 🔹 Maior espaçamento entre os componentes da sidebar */
 .sidebar-section {
   width: 100%;
   display: flex;
@@ -43,11 +41,10 @@
   align-items: center;
 }
 
-/* 🔹 Linha separadora entre componentes */
 .sidebar-divider {
   width: 80%;
   height: 1px;
-  background: rgba(255, 255, 255, 0.3); /* 🔹 Linha sutil e translúcida */
+  background: rgba(255, 255, 255, 0.3);
   border: none;
   margin-top: 4px;
   margin-bottom: 20px;

@@ -61,7 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       <div className="sidebar-section">
         <h3 className="section-title">Estatísticas</h3>
-        <StatsComponent timeElapsed={timeElapsed} attempts={1} /> {/* 🔹 Adicionado attempts */}
+        <StatsComponent timeElapsed={timeElapsed} attempts={1} />
       </div>
 
       <hr className="sidebar-divider" />

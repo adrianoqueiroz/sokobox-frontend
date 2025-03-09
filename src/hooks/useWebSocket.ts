@@ -13,12 +13,12 @@ export const useWebSocket = () => {
 
     ws.onopen = () => {
       console.log('✅ Conectado ao WebSocket!')
-      setSocket(ws as WebSocket) // 🔹 Garantimos que `ws` é do tipo correto
+      setSocket(ws as WebSocket)
     }
 
     ws.onmessage = (event) => {
       try {
-        // console.log("📥 Mensagem recebida:", event.data);
+      
         const parsedData = JSON.parse(event.data)
         setGameState(parsedData)
       } catch (error) {
@@ -39,15 +39,14 @@ export const useWebSocket = () => {
   const sendMove = (
     sessionId: string,
     direction: string,
-    resetMovesAfterIndex: number,
+    currentMoveIndex: number,
   ) => {
     if (!socket) {
       console.error('❌ WebSocket não está conectado!')
       return
     }
 
-    const moveCommand = { sessionId, direction, resetMovesAfterIndex }
-    // console.log("📤 Enviando movimento via WebSocket:", moveCommand);
+    const moveCommand = { sessionId, direction, currentMoveIndex }
     socket.send(JSON.stringify(moveCommand))
   }
 

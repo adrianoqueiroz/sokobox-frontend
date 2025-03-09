@@ -1,72 +1,55 @@
 import React, { useEffect, useState } from 'react'
+import { Position, Direction } from '../../types/GameTypes'
 
 interface PlayerProps {
-  row: number
-  col: number
-  direction: 'up' | 'down' | 'left' | 'right'
+  position: Position
+  direction: Direction
   cellSize: number
+  skinIndex: number
 }
 
-const Player: React.FC<PlayerProps> = ({ row, col, direction, cellSize }) => {
-  // Estado para o índice do frame (0, 1 ou 2) – 1 é o idle (parado)
+const Player: React.FC<PlayerProps> = ({ position, direction, cellSize, skinIndex }) => {
   const [currentFrame, setCurrentFrame] = useState(1)
 
-  // Determina a linha do sprite com base na direção:
-  // 0: de frente (down), 1: left, 2: right, 3: de costas (up)
-  let spriteRow = 0
-  if (direction === 'up') spriteRow = 3
-  else if (direction === 'left') spriteRow = 1
-  else if (direction === 'right') spriteRow = 2
-  // 'down' permanece 0
+  const baseRow = {
+    [Direction.DOWN]: 0,
+    [Direction.LEFT]: 1,
+    [Direction.RIGHT]: 2,
+    [Direction.UP]: 3,
+  }[direction]
 
-  // Calcula o background-position com base no frame atual.
-  // O frame idle é o de índice 1.
-  const bgPosition = `-${currentFrame * cellSize}px -${spriteRow * cellSize}px`
 
-  // Alterna os frames durante a transição
+  const spriteRow = baseRow + Math.floor(skinIndex / 4) * 4
+  const spriteColOffset = (skinIndex % 4) * 3
+  const bgPosition = `-${(spriteColOffset + currentFrame) * cellSize}px -${spriteRow * cellSize}px`
+
   useEffect(() => {
+    let animationFrames = [0, 1, 2, 1]
+    let frameIndex = 0
+
     const interval = setInterval(() => {
-      setCurrentFrame((prev) => (prev + 1) % 3)
-    }, 25)
-    const timer = setTimeout(() => {
-      clearInterval(interval)
-      //   setCurrentFrame(1); // força o idle no final
-    }, 150)
-    return () => {
-      clearInterval(interval)
-      clearTimeout(timer)
-    }
-  }, [row, col, direction])
+      setCurrentFrame(animationFrames[frameIndex])
+      frameIndex = (frameIndex + 1) % animationFrames.length
+    }, 60)
 
-  //sprite 1
-  // return (
-  //   <div
-  //     style={{
-  //       position: 'absolute',
-  //       width: cellSize,
-  //       height: cellSize,
-  //       top: `${row * cellSize}px`,
-  //       left: `${col * cellSize}px`,
-  //       transition: 'top 0.2s ease-in-out, left 0.2s ease-in-out',
-  //       background: "url('/assets/player-sprite.png') no-repeat",
-  //       backgroundSize: '600px 400px',
-  //       backgroundPosition: bgPosition,
-  //       zIndex: 3,
-  //     }}
-  //   />
-  // );
+    setTimeout(() => {
+      clearInterval(interval)
+      setCurrentFrame(1)
+    }, 240)
 
-  //sprite2
+    return () => clearInterval(interval)
+  }, [position.row, position.col, direction])
+
   return (
     <div
       style={{
         position: 'absolute',
         width: cellSize,
         height: cellSize,
-        top: `${row * cellSize}px`,
-        left: `${col * cellSize}px`,
+        top: `${position.row * cellSize}px`,
+        left: `${position.col * cellSize}px`,
         transition: 'top 0.2s ease-in-out, left 0.2s ease-in-out',
-        background: "url('/assets/player-sprite3.png') no-repeat",
+        background: "url('/assets/player-sprite.png') no-repeat",
         backgroundSize: '600px 400px',
         backgroundPosition: bgPosition,
         zIndex: 3,

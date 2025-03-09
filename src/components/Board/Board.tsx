@@ -3,7 +3,8 @@ import {
   TerrainType,
   ObjectType,
   MovedObject,
-  MoveDirection,
+  Direction,
+  Position
 } from '../../types/GameTypes'
 import Player from '../Player/Player'
 import MovingObject from '../MovingObject/MovingObject'
@@ -16,9 +17,8 @@ interface BoardProps {
   terrain: TerrainType[][]
   objects: ObjectType[][]
   animatingObjects: MovedObject[]
-  playerDirection: 'up' | 'down' | 'left' | 'right'
-  playerRow: number
-  playerCol: number
+  playerDirection: Direction
+  playerPosition: Position
 }
 
 const Board: React.FC<BoardProps> = ({
@@ -26,8 +26,7 @@ const Board: React.FC<BoardProps> = ({
   objects,
   animatingObjects,
   playerDirection,
-  playerRow,
-  playerCol,
+  playerPosition,
 }) => {
   if (!terrain.length || !terrain[0].length) {
     return <div className="board">Tabuleiro vazio ou inválido</div>
@@ -115,11 +114,11 @@ const Board: React.FC<BoardProps> = ({
       )}
 
       {/* Camada 4: Player */}
-      <Player
-        row={playerRow}
-        col={playerCol}
-        direction={playerDirection}
-        cellSize={CELL_SIZE}
+      <Player 
+        position={playerPosition} 
+        direction={playerDirection} 
+        cellSize={CELL_SIZE} 
+        skinIndex={3}
       />
     </div>
   )

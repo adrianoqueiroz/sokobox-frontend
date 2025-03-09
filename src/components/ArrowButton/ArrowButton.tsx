@@ -2,7 +2,7 @@ import React from "react";
 import "./ArrowButton.css";
 
 interface ArrowButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  direction: "left" | "right"; // 🔹 Define a direção do botão
+  direction: "left" | "right";
 }
 
 const ArrowButton: React.FC<ArrowButtonProps> = ({ direction, ...props }) => {

@@ -32,7 +32,7 @@ const FixedObject: React.FC<FixedObjectProps> = ({
         left: `${left}px`,
         background: `url(${imageUrl}) no-repeat center`,
         backgroundSize: '100% 100%',
-        zIndex: 4, // Acima do overlay de destino (z-index: 2 ou 3)
+        zIndex: 4,
       }}
     />
   )

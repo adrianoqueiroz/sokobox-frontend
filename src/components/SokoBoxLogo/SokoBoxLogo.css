@@ -7,13 +7,11 @@
     position: relative;
     display: inline-block;
     padding: 20px 40px 15px;
-    margin-bottom: 25px; /* 🔹 Aumentamos o espaçamento abaixo da logo */
+    margin-bottom: 25px;
     text-align: center;
     white-space: nowrap;
   }
-  
-  
-  /* 🚀 Foguete posicionado na frente do texto */
+
   .sokobox-logo::before {
     content: '🚀';
     font-size: 30px;
@@ -23,8 +21,7 @@
     transform: translateY(-50%);
     animation: fire-rocket 1.2s infinite alternate;
   }
-  
-  /* 🔥 Animação do foguete mexendo levemente */
+
   @keyframes fire-rocket {
     0% {
       transform: translateY(-50%) rotate(-30deg);
@@ -33,8 +30,7 @@
       transform: translateY(-50%) rotate(-60deg);
     }
   }
-  
-  /* 🔥 Rastro de fogo ajustado logo abaixo do nome */
+
   .sokobox-logo::after {
     content: '';
     position: absolute;

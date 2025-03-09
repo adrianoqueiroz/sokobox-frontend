@@ -1,15 +1,8 @@
 .board {
-  box-sizing: border-box; /* Recomendo border-box para facilitar o controle */
-  margin: 0 auto; /* Centraliza horizontalmente o board no contêiner-pai */
-  padding: 0;
-  display: block; /* Use block para que o conteúdo não seja centralizado internamente */
-  position: relative; /* Fundamental para que elementos absolutos se posicionem em relação a ele */
-  /* Simula uma borda interna de 4px */
-  box-shadow: inset 0 0 0 4px rgba(34, 35, 37, 0.67);
-  border-radius: 10px;
-  box-shadow:
-    inset 0 0 0 4px rgba(34, 35, 37, 0.67),
-    0 5px 20px rgba(34, 36, 39, 0.67);
+  box-sizing: border-box; 
+  margin: 0 auto; 
+  display: block;
+  position: relative;
 }
 
 .board-row {
@@ -25,7 +18,6 @@
   justify-content: center;
 }
 
-/* 🔹 Terreno sempre fixo no fundo */
 .cell-terrain {
   position: absolute;
   width: 100%;
@@ -35,10 +27,9 @@
   justify-content: center;
   font-size: 24px;
   font-weight: bold;
-  z-index: 1; /* Sempre por baixo dos objetos */
+  z-index: 1;
 }
 
-/* 🔹 Objetos animados */
 .cell-object {
   position: absolute;
   width: 100%;
@@ -49,41 +40,38 @@
   font-size: 24px;
   font-weight: bold;
   transition: transform 0.2s ease-out;
-  background-color: transparent; /* Remove fundo sólido */
+  background-color: transparent;
   z-index: 3;
 }
 
-/* 🔹 Estilos para a Caixa */
 .object-box {
   width: 100%;
   height: 100%;
-  background-image: url('/assets/box.png'); /* Substitua pelo caminho correto */
+  background-image: url('/assets/box.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  z-index: 2; /* Acima do piso (z-index: 1) */
+  z-index: 2;
 }
 
-/* 🔹 Estilos para o terreno */
 .terrain-wall {
-  background-image: url('/assets/wall.png'); /* Caminho da imagem */
-  background-size: cover; /* Garante que a imagem ocupe todo o espaço */
+  background-image: url('/assets/wall.png');
+  background-size: cover;
   background-position: center;
-  z-index: 1; /* Sempre por baixo dos objetos */
+  z-index: 1;
 }
 
 .terrain-floor,
 .terrain-destination {
-  background-image: url('/assets/floor4.png'); /* Caminho da imagem */
-  background-size: cover; /* Garante que a imagem ocupe todo o espaço */
+  background-image: url('/assets/floor4.png');
+  background-size: cover;
   background-position: center;
 
   box-shadow: 0px 0px 0px 0.3px black;
   border-radius: 1px;
-  z-index: 1; /* Sempre por baixo dos objetos */
+  z-index: 1;
 }
 
-/* 🔹 Animação para o destino */
 @keyframes glow {
   0% {
     box-shadow: 0 0 10px red;
@@ -96,7 +84,6 @@
   }
 }
 
-/* 🔹 Estilos para os objetos */
 .object-player {
   color: blue;
   z-index: 3;
@@ -111,9 +98,8 @@
   transition: opacity 0.3s ease-in-out;
 }
 
-//* --- Efeito de Destino --- */
 
-/* Overlay para as células de destino */
+
 .destination-slot {
   position: absolute;
   top: 0;
@@ -121,11 +107,10 @@
   width: 90%;
   height: 90%;
   transform: translate(5%, 5%);
-  z-index: 2; /* Fica acima do piso, mas abaixo dos objetos */
+  z-index: 2;
   pointer-events: none;
 }
 
-/* 🔹 Overlay para as células de destino (sempre presente, mas invisível no início) */
 .destination-slot::before {
   content: '';
   position: absolute;
@@ -139,17 +124,15 @@
   background-color: rgba(255, 0, 0, 0.3);
   box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
   z-index: 3;
-  opacity: 0; /* 🔹 Começa invisível */
-  transition: opacity 0.4s ease-out; /* 🔹 Suaviza a entrada e saída */
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
 }
 
-/* 🔹 Quando a caixa NÃO está no destino, o efeito vermelho aparece + glow pulsante */
 .destination-slot:not(.box-on-top)::before {
   opacity: 1;
-  animation: destination-glow 1.5s infinite alternate ease-in-out; /* 🔹 Efeito pulsante */
+  animation: destination-glow 1.5s infinite alternate ease-in-out;
 }
 
-/* 🔹 Animação do glow vermelho (pulsação) */
 @keyframes destination-glow {
   0% {
     box-shadow: 0 0 5px rgba(255, 0, 0, 0.6);
@@ -168,7 +151,6 @@
   }
 }
 
-/* 🔹 Quando a caixa ESTÁ no destino, ativa o efeito verde */
 .destination-slot.box-on-top::after {
   content: '';
   position: absolute;
@@ -184,11 +166,10 @@
   box-shadow: 0 0 25px rgba(0, 255, 0, 1);
 
   z-index: 3;
-  opacity: 0; /* 🔹 Começa invisível */
-  transition: opacity 0.4s ease-out; /* 🔹 Suaviza entrada e saída */
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
 }
 
-/* 🔹 Faz o efeito verde aparecer quando a caixa está no destino */
 .destination-slot.box-on-top::after {
   opacity: 1;
 }

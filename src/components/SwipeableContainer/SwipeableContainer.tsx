@@ -15,7 +15,7 @@ const SwipeableContainer: React.FC<SwipeableContainerProps> = ({
     onSwipedRight: () => onSwipe('right'),
     onSwipedUp: () => onSwipe('up'),
     onSwipedDown: () => onSwipe('down'),
-    preventScrollOnSwipe: true, // Use essa propriedade em vez de preventDefaultTouchmoveEvent
+    preventScrollOnSwipe: true,
     trackMouse: true,
   })
 

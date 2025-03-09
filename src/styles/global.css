@@ -4,3 +4,8 @@
   box-sizing: border-box;
   font-family: 'Orbitron', Arial, sans-serif;
 }
+
+html, body {
+  overflow: hidden;
+  touch-action: none;
+}

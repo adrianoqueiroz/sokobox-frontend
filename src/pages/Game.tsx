@@ -1,269 +1,223 @@
-import React, { useEffect, useState } from 'react'
-import Sidebar from '../components/Sidebar/Sidebar'
-import {
-  getLatestSession,
-  restartSession,
-  getPhases,
-} from '../services/sessionService'
-import {
-  TerrainType,
-  ObjectType,
-  MoveDirection,
-  MovedObject,
-} from '../types/GameTypes'
-import { useWebSocket } from '../hooks/useWebSocket'
-import SwipeableBoard from '../components/SwipeableBoard/SwipeableBoard'
-import './Game.css'
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import { useSwipeable } from 'react-swipeable';
+import Sidebar from '../components/Sidebar/Sidebar';
+import { getLatestSession, restartSession, getPhases } from '../services/sessionService';
+import { GameSession, TerrainType, ObjectType, Direction, MovedObject, Position } from '../types/GameTypes';
+import { useWebSocket } from '../hooks/useWebSocket';
+import ZoomableBoard from '../components/ZoomableBoard/ZoomableBoard';
+import './Game.css';
 
 const Game: React.FC = () => {
-  const [sessionId, setSessionId] = useState<string | null>(null)
-  const [terrain, setTerrain] = useState<TerrainType[][]>([])
-  const [objects, setObjects] = useState<ObjectType[][]>([])
-  const [animatingObjects, setAnimatingObjects] = useState<MovedObject[]>([])
-  const [moveQueue, setMoveQueue] = useState<MoveDirection[]>([])
-  const [isMoving, setIsMoving] = useState(false)
-  const [isProcessingQueue, setIsProcessingQueue] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [movesCount, setMovesCount] = useState(0)
-  const [timeElapsed, setTimeElapsed] = useState(0)
-  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null)
-  const [phases, setPhases] = useState<{ id: string; name: string }[]>([])
-  const [phaseIndex, setPhaseIndex] = useState(0)
-  const [moveHistory, setMoveHistory] = useState<ObjectType[][][]>([])
-  const [currentMoveIndex, setCurrentMoveIndex] = useState(0)
-  const [playerDirection, setPlayerDirection] = useState<
-    'up' | 'down' | 'left' | 'right'
-  >('down')
+  const [currentSession, setCurrentSession] = useState<GameSession | null>(null);
+  const [terrain, setTerrain] = useState<TerrainType[][]>([]);
+  const [objects, setObjects] = useState<ObjectType[][]>([]);
+  const [animatingObjects, setAnimatingObjects] = useState<MovedObject[]>([]);
+  const [moveQueue, setMoveQueue] = useState<Direction[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [movesCount, setMovesCount] = useState(0);
+  const [timeElapsed, setTimeElapsed] = useState(0);
+  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
+  const [phases, setPhases] = useState<{ id: string; name: string }[]>([]);
+  const [phaseIndex, setPhaseIndex] = useState(0);
+  const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
+  const [playerDirection, setPlayerDirection] = useState<Direction>(Direction.DOWN);
 
-  const { gameState, sendMove: sendMoveWS } = useWebSocket()
+  const { gameState, sendMove: sendMoveWS } = useWebSocket();
 
-  // Atualiza o histórico de movimentos
+  /** 🔹 Carrega as fases e a sessão */
   useEffect(() => {
-    if (!sessionId) return
+    const fetchGameData = async () => {
+      try {
+        const phasesData = await getPhases();
+        setPhases(phasesData);
+        setPhaseIndex(0);
 
-    if (
-      moveHistory.length === 0 ||
-      currentMoveIndex === moveHistory.length - 1
-    ) {
-      setMoveHistory([...moveHistory, objects])
-      setCurrentMoveIndex(moveHistory.length)
-    }
-  }, [objects])
-
-  const handleUndoMove = () => {
-    if (currentMoveIndex > 0) {
-      setCurrentMoveIndex(currentMoveIndex - 1)
-      setObjects(moveHistory[currentMoveIndex - 1])
-    }
-  }
-
-  const handleRedoMove = () => {
-    if (currentMoveIndex < moveHistory.length - 1) {
-      setCurrentMoveIndex(currentMoveIndex + 1)
-      setObjects(moveHistory[currentMoveIndex + 1])
-    }
-  }
-
-  useEffect(() => {
-    getPhases().then((data) => {
-      setPhases(data)
-      setPhaseIndex(0)
-    })
-
-    getLatestSession().then((data) => {
-      if (data) {
-        setSessionId(data.sessionId)
-        setTerrain(data.terrain)
-        setObjects(data.objects)
-        if (data.createdAt) setSessionStartTime(new Date(data.createdAt))
-        if (data.moves) setMovesCount(data.moves.length)
-        setIsLoading(false)
+        const sessionData = await getLatestSession();
+        if (sessionData) {
+          setCurrentSession(sessionData);
+          setTerrain(sessionData.terrain);
+          setObjects(sessionData.objects);
+          setSessionStartTime(new Date(sessionData.updatedAt));
+          setMovesCount(sessionData.moves.length);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar sessão:', error);
+      } finally {
+        setIsLoading(false);
       }
-    })
-  }, [])
+    };
 
+    fetchGameData();
+  }, []);
+
+  /** 🔹 Atualiza o tempo de jogo */
   useEffect(() => {
-    if (!sessionStartTime) return
-    const interval = setInterval(() => {
-      const now = new Date()
-      const elapsedTime = Math.floor(
-        (now.getTime() - sessionStartTime.getTime()) / 1000,
-      )
-      setTimeElapsed(elapsedTime)
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [sessionStartTime])
+    if (!sessionStartTime) return;
 
-  const handleRestart = async () => {
-    if (!sessionId) return
-    const data = await restartSession(sessionId)
-    if (data) {
-      setTerrain(data.terrain)
-      setObjects(data.objects)
-      setMovesCount(0)
-      setTimeElapsed(0)
-      setSessionStartTime(new Date(data.updatedAt))
-    }
-  }
+    const updateTime = () => {
+      const now = new Date();
+      setTimeElapsed(Math.floor((now.getTime() - sessionStartTime.getTime()) / 1000));
+    };
 
-  // Adiciona movimento à fila via evento de teclado
+    updateTime(); // Atualiza imediatamente
+
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, [sessionStartTime]);
+
+  /** 🔹 Captura eventos de teclado */
   useEffect(() => {
-    if (!sessionId) return
+    if (!currentSession) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Ignora novas entradas se já estiver em movimento
-      if (isMoving) return
+      if (isProcessing) return;
 
-      let direction: MoveDirection | null = null
-      if (event.key === 'ArrowUp') direction = MoveDirection.UP
-      if (event.key === 'ArrowDown') direction = MoveDirection.DOWN
-      if (event.key === 'ArrowLeft') direction = MoveDirection.LEFT
-      if (event.key === 'ArrowRight') direction = MoveDirection.RIGHT
+      const directionMap: { [key: string]: Direction } = {
+        ArrowUp: Direction.UP,
+        ArrowDown: Direction.DOWN,
+        ArrowLeft: Direction.LEFT,
+        ArrowRight: Direction.RIGHT,
+      };
 
+      const direction = directionMap[event.key];
       if (direction) {
-        setMoveQueue((prevQueue) => [...prevQueue, direction])
+        setMoveQueue((prevQueue) => [...prevQueue, direction]);
       }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [currentSession, isProcessing]);
+
+  /** 🔹 Captura eventos de Swipe */
+  const handleSwipe = useCallback((direction: Direction) => {
+    if (!currentSession) return;
+    setMoveQueue((prevQueue) => [...prevQueue, direction]);
+  }, [currentSession]);
+
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => handleSwipe(Direction.LEFT),
+    onSwipedRight: () => handleSwipe(Direction.RIGHT),
+    onSwipedUp: () => handleSwipe(Direction.UP),
+    onSwipedDown: () => handleSwipe(Direction.DOWN),
+    preventScrollOnSwipe: true,
+    trackMouse: true,
+    delta: 10,
+  });
+
+  /** 🔹 Encontra a posição do player no mapa */
+  const playerPosition: Position | null = useMemo(() => {
+    for (let row = 0; row < objects.length; row++) {
+      const col = objects[row].indexOf(ObjectType.PLAYER);
+      if (col !== -1) return { row, col };
     }
+    return { row: 0, col: 0 }; // Posição padrão caso não encontre
+  }, [objects]);
+  
+  
 
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [sessionId, isMoving])
+  /** 🔹 Reinicia o jogo */
+  const handleRestart = async () => {
+    if (!currentSession) return;
 
-  const handleSwipe = (direction: MoveDirection) => {
-    // Aqui você pode optar por ignorar isMoving se quiser permitir movimentos contínuos
+    try {
+      const data = await restartSession(currentSession.sessionId);
+      if (data) {
+        setCurrentSession(data);
+        setTerrain(data.terrain);
+        setObjects(data.objects);
+        setTimeElapsed(0);
+        setSessionStartTime(new Date(data.updatedAt));
+        setCurrentMoveIndex(0);
+        setMovesCount(0);
+        setIsProcessing(false);
+      }
+    } catch (error) {
+      console.error('Erro ao reiniciar a sessão:', error);
+    }
+  };
 
-    console.log('Swipe detectado:', direction)
-
-    setMoveQueue((prevQueue) => [...prevQueue, direction])
-  }
-
-  // Processa a fila de movimentos via WebSocket
+  /** 🔹 Processa a fila de movimentos */
   useEffect(() => {
-    if (!sessionId || moveQueue.length === 0 || isMoving || isProcessingQueue)
-      return
+    if (!currentSession || moveQueue.length === 0 || isProcessing) return;
 
-    setIsProcessingQueue(true)
-    const move = moveQueue[0]
-    setIsMoving(true)
+    setIsProcessing(true);
+    const move = moveQueue[0];
 
-    // Se currentMoveIndex for 0 (ou seja, sem movimentos anteriores), envia -1 para indicar que não há índice válido.
-    const resetIndex = currentMoveIndex === 0 ? -1 : currentMoveIndex
-    sendMoveWS(sessionId, move, resetIndex)
+    sendMoveWS(currentSession.sessionId, move, currentMoveIndex);
 
-    // Remove o movimento enviado da fila
-    setMoveQueue((prevQueue) => prevQueue.slice(1))
-  }, [
-    sessionId,
-    moveQueue,
-    isMoving,
-    isProcessingQueue,
-    sendMoveWS,
-    currentMoveIndex,
-  ])
+    setMoveQueue((prevQueue) => prevQueue.slice(1));
+  }, [currentSession, moveQueue, isProcessing, sendMoveWS, currentMoveIndex]);
 
-  // Atualiza o estado do jogo a partir do gameState recebido via WebSocket
-  // Atualiza o estado do jogo a partir do gameState recebido via WebSocket
+  /** 🔹 Atualiza o estado do jogo */
   useEffect(() => {
     if (gameState) {
       if (gameState.error) {
-        console.error('Erro recebido do backend:', gameState.error)
-        setIsMoving(false)
-        setIsProcessingQueue(false)
-        return
+        console.error('Erro do backend:', gameState.error);
+        setIsProcessing(false);
+        return;
       }
 
-      console.log('gameState recebido:', gameState)
-      const { moves, objects } = gameState
-      setObjects(objects)
-      setMovesCount(moves.length)
-      const lastMove =
-        moves && moves.length > 0 ? moves[moves.length - 1] : null
-      if (lastMove && lastMove.movedObjects) {
-        console.log(
-          'Atualizando animação com movedObjects:',
-          lastMove.movedObjects,
-        )
-        setAnimatingObjects(lastMove.movedObjects)
+      setObjects(gameState.objects);
+      setMovesCount(gameState.moves.length);
 
-        // Atualiza a direção do player se houver movimento do PLAYER
+      const lastMove = gameState.moves.at(-1);
+      if (lastMove?.movedObjects) {
+        
         const playerMove = lastMove.movedObjects.find(
-          (obj: MovedObject) => obj.type === 'PLAYER',
-        )
+          (obj: MovedObject) => obj.type === ObjectType.PLAYER
+        );
+        
         if (playerMove) {
-          let direction: 'up' | 'down' | 'left' | 'right' = 'down'
-          if (playerMove.toRow < playerMove.fromRow) direction = 'up'
-          else if (playerMove.toRow > playerMove.fromRow) direction = 'down'
-          else if (playerMove.toCol < playerMove.fromCol) direction = 'left'
-          else if (playerMove.toCol > playerMove.fromCol) direction = 'right'
-          setPlayerDirection(direction)
+          const direction 
+            = playerMove.toRow < playerMove.fromRow ? Direction.UP
+            : playerMove.toRow > playerMove.fromRow ? Direction.DOWN
+            : playerMove.toCol < playerMove.fromCol ? Direction.LEFT
+            : Direction.RIGHT;
+          setPlayerDirection(direction);
         }
 
-        // Após 500ms (duração da animação), remove os AnimatedObjects e libera o próximo movimento
+        setAnimatingObjects(lastMove.movedObjects);
         setTimeout(() => {
-          setAnimatingObjects([])
-          setIsMoving(false)
-          setIsProcessingQueue(false)
-        }, 220)
+          setAnimatingObjects([]);
+          setIsProcessing(false);
+        }, 220);
       } else {
-        // Se não houver animação, libera imediatamente
-        setIsMoving(false)
-        setIsProcessingQueue(false)
+        setIsProcessing(false);
       }
     }
-  }, [gameState])
-
-  const handlePreviousPhase = () => {
-    setPhaseIndex((prev) => (prev > 0 ? prev - 1 : prev))
-  }
-
-  const handleNextPhase = () => {
-    setPhaseIndex((prev) => (prev < phases.length - 1 ? prev + 1 : prev))
-  }
-
-  // Dentro do Game.tsx (antes do return)
-  const playerPos = React.useMemo(() => {
-    for (let i = 0; i < objects.length; i++) {
-      for (let j = 0; j < objects[i].length; j++) {
-        if (objects[i][j] === 'PLAYER') {
-          return { row: i, col: j }
-        }
-      }
-    }
-    // Se não encontrar, retorna posição padrão (por exemplo, 0,0)
-    return { row: 0, col: 0 }
-  }, [objects])
+  }, [gameState]);
 
   return (
-    <div className="game-wrapper">
+    <div className="game-wrapper" {...swipeHandlers}>
       <div className="game-container">
-        {isLoading ? (
-          <p>Carregando sessão...</p>
-        ) : (
-          <SwipeableBoard
-            onSwipe={handleSwipe}
-            terrain={terrain}
-            objects={objects}
-            animatingObjects={animatingObjects}
-            playerDirection={playerDirection}
-            playerRow={playerPos.row}
-            playerCol={playerPos.col}
-          />
-        )}
+        {isLoading ? <p>Carregando...</p> :
+         <ZoomableBoard 
+          terrain={terrain} 
+          objects={objects} 
+          animatingObjects={animatingObjects} 
+          playerDirection={playerDirection} 
+          playerPosition={playerPosition}
+          onSwipe={handleSwipe} 
+         />}
       </div>
+
       <Sidebar
         movesCount={movesCount}
         timeElapsed={timeElapsed}
         onRestart={handleRestart}
         phaseName={phases[phaseIndex]?.name || 'Fase Desconhecida'}
-        onPreviousPhase={handlePreviousPhase}
-        onNextPhase={handleNextPhase}
-        onUndoMove={handleUndoMove}
-        onRedoMove={handleRedoMove}
+        onPreviousPhase={() => setPhaseIndex((prev) => Math.max(0, prev - 1))}
+        onNextPhase={() => setPhaseIndex((prev) => Math.min(phases.length - 1, prev + 1))}
+        onUndoMove={() => setCurrentMoveIndex((prev) => Math.max(0, prev - 1))}
+        onRedoMove={() => setCurrentMoveIndex((prev) => Math.min(moveQueue.length - 1, prev + 1))}
         canUndo={currentMoveIndex > 0}
-        canRedo={currentMoveIndex < moveHistory.length - 1}
+        canRedo={currentMoveIndex < moveQueue.length - 1}
       />
-    </div>
-  )
-}
 
-export default Game
+    </div>
+  );
+};
+
+export default Game;

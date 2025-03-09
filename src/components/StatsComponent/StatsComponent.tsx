@@ -3,7 +3,7 @@ import "./StatsComponent.css";
 
 interface StatsComponentProps {
   timeElapsed: number;
-  attempts: number; // 🔹 Novo parâmetro para tentativas
+  attempts: number;
 }
 
 const StatsComponent: React.FC<StatsComponentProps> = ({ timeElapsed, attempts }) => {

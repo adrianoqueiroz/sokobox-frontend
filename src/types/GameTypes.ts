@@ -1,23 +1,31 @@
-// Definição dos tipos de terreno
+export interface GameSession {
+  sessionId: string;
+  playerId: string;
+  phaseId: string;
+  terrain: TerrainType[][];
+  objects: ObjectType[][];
+  moves: Move[];
+  completed: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export enum TerrainType {
+  NONE = 'NONE',
   WALL = 'WALL',
   FLOOR = 'FLOOR',
   DESTINATION = 'DESTINATION',
 }
 
-// Definição dos tipos de objetos
 export enum ObjectType {
   NONE = 'NONE',
   PLAYER = 'PLAYER',
   BOX = 'BOX',
 }
 
-// Direções de movimento
-export enum MoveDirection {
-  UP = 'UP',
-  DOWN = 'DOWN',
-  LEFT = 'LEFT',
-  RIGHT = 'RIGHT',
+export interface Move {
+  direction: "UP" | "DOWN" | "LEFT" | "RIGHT";
+  movedObjects: MovedObject[];
 }
 
 export type MovedObject = {
@@ -26,11 +34,32 @@ export type MovedObject = {
   fromCol: number
   toRow: number
   toCol: number
-  progress: number // ✅ Progresso da animação
+  progress: number
 }
 
-// Estrutura do movimento realizado
+export enum Direction {
+  UP = 'UP',
+  DOWN = 'DOWN',
+  LEFT = 'LEFT',
+  RIGHT = 'RIGHT',
+}
+
 export interface MoveRecord {
-  direction: MoveDirection
+  direction: Direction
   movedObjects: MovedObject[]
+}
+
+
+export interface Phase {
+  id: string;
+  name: string;
+  description: string;
+  terrain: TerrainType[][];
+  objects: ObjectType[][];
+}
+
+
+export type Position = {
+  row: number
+  col: number
 }

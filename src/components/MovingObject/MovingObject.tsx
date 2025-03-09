@@ -10,8 +10,8 @@ interface MovingObjectProps {
   from: Coordinates
   to: Coordinates
   cellSize: number
-  useTransition?: boolean // Se true, aplica transição; se false, muda imediatamente (default: true)
-  transitionDuration?: number // Duração da transição em ms (default: 300)
+  useTransition?: boolean
+  transitionDuration?: number
 }
 
 const MovingObject: React.FC<MovingObjectProps> = ({
@@ -24,13 +24,11 @@ const MovingObject: React.FC<MovingObjectProps> = ({
 }) => {
   const round = (value: number) => Math.round(value)
 
-  // Estado para a posição atual, iniciando na posição "from"
   const [position, setPosition] = useState({
     top: round(from.row * cellSize),
     left: round(from.col * cellSize),
   })
 
-  // Atualiza a posição para "to" utilizando useLayoutEffect para evitar flicker
   useLayoutEffect(() => {
     if (useTransition) {
       requestAnimationFrame(() => {
