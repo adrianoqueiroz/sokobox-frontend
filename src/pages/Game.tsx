@@ -154,31 +154,38 @@ const Game: React.FC = () => {
   useEffect(() => {
     if (gameState) {
       if (gameState.error) {
-        console.error('Erro do backend:', gameState.error);
+        console.error("Erro do backend:", gameState.error);
         setIsProcessing(false);
         return;
       }
-
+  
       setObjects(gameState.objects);
       setMovesCount(gameState.moves.length);
-
+  
       const lastMove = gameState.moves.at(-1);
       if (lastMove?.movedObjects) {
-        
         const playerMove = lastMove.movedObjects.find(
           (obj: MovedObject) => obj.type === ObjectType.PLAYER
         );
-        
+  
         if (playerMove) {
-          const direction 
-            = playerMove.toRow < playerMove.fromRow ? Direction.UP
-            : playerMove.toRow > playerMove.fromRow ? Direction.DOWN
-            : playerMove.toCol < playerMove.fromCol ? Direction.LEFT
-            : Direction.RIGHT;
+          const direction =
+            playerMove.toRow < playerMove.fromRow
+              ? Direction.UP
+              : playerMove.toRow > playerMove.fromRow
+              ? Direction.DOWN
+              : playerMove.toCol < playerMove.fromCol
+              ? Direction.LEFT
+              : Direction.RIGHT;
+  
           setPlayerDirection(direction);
         }
-
+  
         setAnimatingObjects(lastMove.movedObjects);
+  
+        // ✅ ATUALIZA O ÍNDICE DO MOVIMENTO PARA O ÚLTIMO MOVIMENTO FEITO
+        setCurrentMoveIndex(gameState.moves.length);
+  
         setTimeout(() => {
           setAnimatingObjects([]);
           setIsProcessing(false);
@@ -188,6 +195,7 @@ const Game: React.FC = () => {
       }
     }
   }, [gameState]);
+  
 
   const handlePreviousPhase = () => {
     setPhaseIndex((prev) => (prev > 0 ? prev - 1 : prev));
@@ -217,6 +225,11 @@ const Game: React.FC = () => {
     setSkinIndex((prev) => (prev < 7 ? prev + 1 : 0));
   };
 
+  const handleMoveChange = (newMove: number) => {
+    if (newMove >= 0 && newMove <= movesCount) {
+      setCurrentMoveIndex(newMove);
+    }
+  };  
 
   return (
     <div className="game-wrapper" {...swipeHandlers}>
@@ -238,12 +251,12 @@ const Game: React.FC = () => {
         timeElapsed={timeElapsed}
         onRestart={handleRestart}
         phaseName={"Phase Name"}
-        phaseNumber={phaseIndex + 1} // 🔹 Convertendo índice para fase real
-        maxPhases={phases.length} // 🔹 Número total de fases disponíveis
-        onPhaseChange={(newPhase) => setPhaseIndex(newPhase - 1)} // 🔹 Atualiza a fase
+        phaseNumber={phaseIndex + 1} 
+        maxPhases={phases.length} 
+        onPhaseChange={(newPhase) => setPhaseIndex(newPhase - 1)} 
         moveHistoryIndex={currentMoveIndex}
-        maxMoves={moveQueue.length - 1}
-        onMoveChange={(newMove) => setCurrentMoveIndex(newMove)}
+        maxMoves={movesCount}
+        onMoveChange={handleMoveChange}
         skinIndex={skinIndex}
         onPreviousSkin={handlePreviousSkin}
         onNextSkin={handleNextSkin}
