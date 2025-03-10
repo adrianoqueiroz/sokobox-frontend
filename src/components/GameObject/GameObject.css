@@ -1,0 +1,16 @@
+.game-object {
+    position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 3;
+  }
+
+  .game-object.box {
+    background-image: url('/assets/box.png');
+  }
+  
+  .game-object.moving {
+    opacity: 0.9;
+  }
+  

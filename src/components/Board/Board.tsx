@@ -1,37 +1,75 @@
-import React from 'react'
+import React from 'react';
 import {
-  TerrainType,
-  ObjectType,
+  TerrainTile,
+  ObjectTile,
   MovedObject,
+  MoveRecord,
   Direction,
-  Position
-} from '../../types/GameTypes'
-import Player from '../Player/Player'
-import MovingObject from '../MovingObject/MovingObject'
-import FixedObject from '../FixedObject/FixedObject'
-import './Board.css'
+  Position,
+  TerrainType,
+  ObjectType
+} from '../../types/GameTypes';
+import Player from '../Player/Player';
+import GameObject from '../GameObject/GameObject';
+import './Board.css';
 
-const CELL_SIZE = 50
+const CELL_SIZE = 50;
 
 interface BoardProps {
-  terrain: TerrainType[][]
-  objects: ObjectType[][]
-  animatingObjects: MovedObject[]
-  playerDirection: Direction
-  playerPosition: Position
-  skinIndex: number
+  terrain: TerrainTile[];
+  objects: ObjectTile[];
+  moveRecords: MoveRecord[]; // Certifique-se de que o componente pai passe pelo menos [] se não houver dados
+  playerDirection: Direction;
+  playerPosition: Position;
+  skinIndex: number;
 }
+
+// Função para achatar o array de MoveRecord em um array plano de MovedObject
+const flattenMovedObjects = (moveRecords: MoveRecord[] = []): MovedObject[] => {
+  return moveRecords.reduce<MovedObject[]>((acc, record) => {
+    if (record.movedObjects && record.movedObjects.length > 0) {
+      return acc.concat(record.movedObjects);
+    }
+    return acc;
+  }, []);
+};
+
+// Função para obter a posição inicial para um tile, se houver um registro em moveRecords
+const getInitialPositionForTile = (
+  tile: ObjectTile,
+  moveRecords: MoveRecord[] = []
+): Position | undefined => {
+  const movedObjects = flattenMovedObjects(moveRecords);
+  const move = movedObjects.find(mov =>
+    mov.type === tile.type &&
+    mov.finalPosition.row === tile.position.row &&
+    mov.finalPosition.col === tile.position.col
+  );
+  return move ? { row: move.initialPosition.row, col: move.initialPosition.col } : undefined;
+};
 
 const Board: React.FC<BoardProps> = ({
   terrain,
   objects,
-  animatingObjects,
+  moveRecords,
   playerDirection,
   playerPosition,
   skinIndex,
 }) => {
-  if (!terrain.length || !terrain[0].length) {
-    return <div className="board">Tabuleiro vazio ou inválido</div>
+  if (!terrain.length) {
+    return <div className="board">Tabuleiro vazio ou inválido</div>;
+  }
+
+  // Calcula as dimensões do tabuleiro a partir dos tiles de terreno
+  const maxRow = Math.max(...terrain.map(tile => tile.position.row));
+  const maxCol = Math.max(...terrain.map(tile => tile.position.col));
+
+  // Agrupa os tiles de terreno por linha, ordenando por coluna
+  const terrainRows: TerrainTile[][] = [];
+  for (let row = 0; row <= maxRow; row++) {
+    terrainRows[row] = terrain
+      .filter(tile => tile.position.row === row)
+      .sort((a, b) => a.position.col - b.position.col);
   }
 
   return (
@@ -39,16 +77,16 @@ const Board: React.FC<BoardProps> = ({
       className="board"
       style={{
         position: 'relative',
-        width: terrain[0].length * CELL_SIZE,
-        height: terrain.length * CELL_SIZE,
+        width: (maxCol + 1) * CELL_SIZE,
+        height: (maxRow + 1) * CELL_SIZE,
       }}
     >
       {/* Camada 1: Terreno */}
-      {terrain.map((row, rowIndex) => (
-        <div key={`terrain-${rowIndex}`} className="board-row">
-          {row.map((terrainType, colIndex) => (
+      {terrainRows.map((rowTiles, rowIndex) => (
+        <div key={`terrain-row-${rowIndex}`} className="board-row">
+          {rowTiles.map((tile) => (
             <div
-              key={`terrain-cell-${rowIndex}-${colIndex}`}
+              key={`terrain-cell-${tile.position.row}-${tile.position.col}`}
               className="cell"
               style={{
                 width: CELL_SIZE,
@@ -56,13 +94,16 @@ const Board: React.FC<BoardProps> = ({
                 position: 'relative',
               }}
             >
-              <div
-                className={`cell-terrain terrain-${terrainType.toLowerCase()}`}
-              />
-              {/* Camada de destino: se for DESTINATION */}
-              {terrainType === 'DESTINATION' && (
+              <div className={`cell-terrain terrain-${tile.type.toLowerCase()}`} />
+              {tile.type === TerrainType.DESTINATION && (
                 <div
-                  className={`destination-slot ${objects[rowIndex][colIndex] === 'BOX' ? 'box-on-top' : ''}`}
+                  className={`destination-slot ${
+                    objects.find(obj =>
+                      obj.position.row === tile.position.row &&
+                      obj.position.col === tile.position.col &&
+                      obj.type === ObjectType.BOX
+                    ) ? 'box-on-top' : ''
+                  }`}
                   style={{
                     position: 'absolute',
                     top: 0,
@@ -77,45 +118,30 @@ const Board: React.FC<BoardProps> = ({
         </div>
       ))}
 
-      {/* Camada 2: Objetos estáticos (FixedObject) – renderizados quando não estão animados */}
-      {objects.map((row, rowIndex) =>
-        row.map((objectType, colIndex) => {
-          if (objectType === 'NONE' || objectType === 'PLAYER') return null
-          // Verifica se há um objeto animado nessa célula
-          const isAnimating = animatingObjects.some(
-            (anim) => anim.toRow === rowIndex && anim.toCol === colIndex,
-          )
-          if (!isAnimating) {
-            const imageUrl = objectType === 'BOX' ? '/assets/box.png' : ''
-            return (
-              <FixedObject
-                key={`fixed-${rowIndex}-${colIndex}`}
-                imageUrl={imageUrl}
-                cellSize={CELL_SIZE}
-                from={{ row: rowIndex, col: colIndex }}
-              />
-            )
-          }
-          return null
-        }),
-      )}
+      {/* Camada 2: Objetos (exceto NONE e PLAYER) */}
+      {objects
+        .filter(obj => obj.type !== ObjectType.NONE && obj.type !== ObjectType.PLAYER)
+        .map((obj) => {
+          const initialPos = getInitialPositionForTile(obj, moveRecords);
+          console.log(
+            `Renderizando objeto ${obj.type} - Posição final: ${JSON.stringify(obj.position)}, ` +
+            `posição inicial: ${initialPos ? JSON.stringify(initialPos) : 'não animado'}`
+          );
+          const imageUrl = obj.type === ObjectType.BOX ? '/assets/box.png' : '';
+          return (
+            <GameObject
+              key={`gameobj-${obj.position.row}-${obj.position.col}`}
+              position={obj.position}   // posição final
+              initialPosition={initialPos} // se definido, dispara a animação
+              cellSize={CELL_SIZE}
+              objectType={obj}
+              transitionDuration={240}
+            />
+          );
+        })
+      }
 
-      {/* Camada 3: Objetos animados */}
-      {animatingObjects.map((obj, index) =>
-        obj.type !== 'PLAYER' ? (
-          <MovingObject
-            key={`anim-${index}`}
-            from={{ row: obj.fromRow, col: obj.fromCol }}
-            to={{ row: obj.toRow, col: obj.toCol }}
-            cellSize={CELL_SIZE}
-            imageUrl={obj.type === 'BOX' ? '/assets/box.png' : ''}
-            useTransition={true}
-            transitionDuration={240}
-          />
-        ) : null,
-      )}
-
-      {/* Camada 4: Player */}
+      {/* Camada 3: Player */}
       <Player 
         position={playerPosition} 
         direction={playerDirection} 
@@ -123,7 +149,7 @@ const Board: React.FC<BoardProps> = ({
         skinIndex={skinIndex}
       />
     </div>
-  )
-}
+  );
+};
 
-export default Board
+export default Board;

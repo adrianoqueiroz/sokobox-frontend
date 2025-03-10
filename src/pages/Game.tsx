@@ -2,15 +2,23 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { getLatestSession, restartSession, getPhases } from '../services/sessionService';
-import { GameSession, TerrainType, ObjectType, Direction, MovedObject, Position } from '../types/GameTypes';
+import { 
+  GameSession, 
+  TerrainTile, 
+  Direction, 
+  MovedObject, 
+  Position, 
+  ObjectType, 
+  ObjectTile
+} from '../types/GameTypes';
 import { useWebSocket } from '../hooks/useWebSocket';
 import ZoomableBoard from '../components/ZoomableBoard/ZoomableBoard';
 import './Game.css';
 
 const Game: React.FC = () => {
   const [currentSession, setCurrentSession] = useState<GameSession | null>(null);
-  const [terrain, setTerrain] = useState<TerrainType[][]>([]);
-  const [objects, setObjects] = useState<ObjectType[][]>([]);
+  const [terrain, setTerrain] = useState<TerrainTile[]>([]);
+  const [objects, setObjects] = useState<ObjectTile[]>([]);
   const [animatingObjects, setAnimatingObjects] = useState<MovedObject[]>([]);
   const [moveQueue, setMoveQueue] = useState<Direction[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -40,7 +48,7 @@ const Game: React.FC = () => {
           setTerrain(sessionData.terrain);
           setObjects(sessionData.objects);
           setSessionStartTime(new Date(sessionData.updatedAt));
-          setMovesCount(sessionData.moves.length);
+          setMovesCount(sessionData.moveRecords.length);
         }
       } catch (error) {
         console.error('Erro ao carregar sessão:', error);
@@ -107,15 +115,10 @@ const Game: React.FC = () => {
     delta: 10,
   });
 
-  /** Encontra a posicao do player no jogo */
-  const playerPosition: Position | null = useMemo(() => {
-    const found = objects.flatMap((row, rowIndex) =>
-      row.map((objectType, colIndex) =>
-        objectType === ObjectType.PLAYER ? { row: rowIndex, col: colIndex } : null
-      )
-    ).find((pos) => pos !== null);
-  
-    return found ?? { row: 0, col: 0 };
+  /** Encontra a posição do player no jogo */
+  const playerPosition: Position = useMemo(() => {
+    const found = objects.find((obj) => obj.type === ObjectType.PLAYER);
+    return found ? found.position : { row: 0, col: 0 };
   }, [objects]);
 
   /** Reinicia o jogo */
@@ -161,30 +164,20 @@ const Game: React.FC = () => {
       }
   
       setObjects(gameState.objects);
-      setMovesCount(gameState.moves.length);
+      setMovesCount(gameState.moveRecords.length);
   
-      const lastMove = gameState.moves.at(-1);
+      const lastMove = gameState.moveRecords.at(-1);
       if (lastMove?.movedObjects) {
         const playerMove = lastMove.movedObjects.find(
           (obj: MovedObject) => obj.type === ObjectType.PLAYER
         );
   
-        if (playerMove) {
-          const direction =
-            playerMove.toRow < playerMove.fromRow
-              ? Direction.UP
-              : playerMove.toRow > playerMove.fromRow
-              ? Direction.DOWN
-              : playerMove.toCol < playerMove.fromCol
-              ? Direction.LEFT
-              : Direction.RIGHT;
-  
-          setPlayerDirection(direction);
+        if (playerMove) {  
+          setPlayerDirection(lastMove.direction);
         }
   
         setAnimatingObjects(lastMove.movedObjects);
-  
-        setCurrentMoveIndex(gameState.moves.length);
+        setCurrentMoveIndex(gameState.moveRecords.length);
   
         setTimeout(() => {
           setAnimatingObjects([]);
@@ -196,20 +189,17 @@ const Game: React.FC = () => {
     }
   }, [gameState]);
   
-
   const handleMoveChange = (newMove: number) => {
     if (newMove >= 0 && newMove <= movesCount) {
       setCurrentMoveIndex(newMove);
     }
   };
-   
 
   const handleSkinChange = (newSkinIndex: number) => {
     if (newSkinIndex >= 0 && newSkinIndex < 8) { 
       setSkinIndex(newSkinIndex);
     }
-  };  
-
+  };
 
   const getOppositeDirection = (direction: Direction): Direction => {
     switch (direction) {
@@ -249,8 +239,6 @@ const Game: React.FC = () => {
         maxSkins={7}
         onSkinChange={handleSkinChange}
       />
-
-
     </div>
   );
 };
