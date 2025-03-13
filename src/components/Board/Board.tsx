@@ -18,13 +18,13 @@ const CELL_SIZE = 50;
 interface BoardProps {
   terrain: TerrainTile[];
   objects: ObjectTile[];
-  moveRecords: MoveRecord[]; // Certifique-se de que o componente pai passe pelo menos [] se não houver dados
+  moveRecords: MoveRecord[];
   playerDirection: Direction;
   playerPosition: Position;
   skinIndex: number;
 }
 
-// Função para achatar o array de MoveRecord em um array plano de MovedObject
+// Achata o array de MoveRecord em um array plano de MovedObject
 const flattenMovedObjects = (moveRecords: MoveRecord[] = []): MovedObject[] => {
   return moveRecords.reduce<MovedObject[]>((acc, record) => {
     if (record.movedObjects && record.movedObjects.length > 0) {
@@ -34,7 +34,8 @@ const flattenMovedObjects = (moveRecords: MoveRecord[] = []): MovedObject[] => {
   }, []);
 };
 
-// Função para obter a posição inicial para um tile, se houver um registro em moveRecords
+// Obtém a posição inicial para um tile, procurando por um registro cujo finalPosition
+// seja igual à posição atual do tile. Assim, o GameObject pode animar do initialPosition até a posição atual.
 const getInitialPositionForTile = (
   tile: ObjectTile,
   moveRecords: MoveRecord[] = []
@@ -48,6 +49,7 @@ const getInitialPositionForTile = (
   return move ? { row: move.initialPosition.row, col: move.initialPosition.col } : undefined;
 };
 
+
 const Board: React.FC<BoardProps> = ({
   terrain,
   objects,
@@ -56,7 +58,8 @@ const Board: React.FC<BoardProps> = ({
   playerPosition,
   skinIndex,
 }) => {
-  if (!terrain.length) {
+ 
+  if (!terrain || terrain.length === 0) {
     return <div className="board">Tabuleiro vazio ou inválido</div>;
   }
 
@@ -71,6 +74,11 @@ const Board: React.FC<BoardProps> = ({
       .filter(tile => tile.position.row === row)
       .sort((a, b) => a.position.col - b.position.col);
   }
+
+  React.useEffect(() => {
+    console.log("moveRecords atualizados:", moveRecords);
+  }, [moveRecords]);
+  
 
   return (
     <div
@@ -122,16 +130,13 @@ const Board: React.FC<BoardProps> = ({
       {objects
         .filter(obj => obj.type !== ObjectType.NONE && obj.type !== ObjectType.PLAYER)
         .map((obj) => {
+          
           const initialPos = getInitialPositionForTile(obj, moveRecords);
-          console.log(
-            `Renderizando objeto ${obj.type} - Posição final: ${JSON.stringify(obj.position)}, ` +
-            `posição inicial: ${initialPos ? JSON.stringify(initialPos) : 'não animado'}`
-          );
-          const imageUrl = obj.type === ObjectType.BOX ? '/assets/box.png' : '';
+  
           return (
             <GameObject
               key={`gameobj-${obj.position.row}-${obj.position.col}`}
-              position={obj.position}   // posição final
+              position={obj.position}   // posição final (deve ser igual ao finalPosition do registro)
               initialPosition={initialPos} // se definido, dispara a animação
               cellSize={CELL_SIZE}
               objectType={obj}

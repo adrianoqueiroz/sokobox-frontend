@@ -46,23 +46,37 @@ export interface MoveRecord {
   movedObjects: MovedObject[];
 }
 
-export interface GameSession {
+export interface MoveErrorResponse {
+  error: boolean;
+  message: string;
+}
+
+export interface GameSessionResponse {
   sessionId: string;
   playerId: string;
   playerStrength: number;
-  phaseId: string;
-  terrain: TerrainTile[];
-  objects: ObjectTile[];
+  phase: PhaseType; 
+  currentObjects: ObjectTile[];
   moveRecords: MoveRecord[];
   completed: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Phase {
+export interface PhaseType {
   id: string;
   name: string;
   description: string;
   terrain: TerrainTile[];
   objects: ObjectTile[];
+}
+
+export interface MoveResponse {
+  sessionId: string;
+  playerId: string;
+  phaseId: string;
+  terrain: TerrainTile[];
+  objects: ObjectTile[];
+  moveRecords: MoveRecord[];
+  completed: boolean;
 }

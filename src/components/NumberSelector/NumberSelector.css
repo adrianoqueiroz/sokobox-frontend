@@ -5,7 +5,6 @@
   width: 100%;
 }
 
-/* 🔹 Ajuste do título opcional */
 .number-selector-title {
   font-size: 14px;
   font-weight: bold;
@@ -15,15 +14,13 @@
   margin-bottom: 6px;
 }
 
-/* 🔹 Alinhamento dos botões e número na mesma linha */
 .selector-controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px; /* 🔹 Espaço entre os botões e o número */
+  gap: 10px;
 }
 
-/* 🔹 Número centralizado dentro da caixa */
 .selector-number-box {
   position: relative;
   width: 50px;
@@ -37,7 +34,6 @@
   box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
-/* 🔹 Estilização do número */
 .selector-number {
   font-size: 18px;
   font-weight: bold;

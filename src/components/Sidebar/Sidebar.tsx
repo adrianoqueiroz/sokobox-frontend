@@ -52,7 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="sidebar-section">
         <h3 className="section-title">Fase</h3>
         <NumberSelector
-          label={`Fase: ${phaseName}`} // 🔹 Mostra o nome da fase junto ao número
+          label={phaseName}
           value={phaseNumber}
           minValue={1}
           maxValue={maxPhases}

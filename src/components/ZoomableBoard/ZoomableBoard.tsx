@@ -1,13 +1,13 @@
 import React, { useRef, useState } from 'react';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import Board from '../Board/Board';
-import { Direction, ObjectTile, Position, TerrainTile } from '../../types/GameTypes';
+import { Direction, MoveRecord, ObjectTile, Position, TerrainTile } from '../../types/GameTypes';
 
 interface ZoomableBoardProps {
   onSwipe: (direction: Direction) => void;
   terrain: TerrainTile[];
   objects: ObjectTile[];
-  animatingObjects: any[];
+  moveRecords: MoveRecord[];
   playerDirection: Direction;
   playerPosition: Position;
   skinIndex: number;
