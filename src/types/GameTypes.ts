@@ -12,7 +12,6 @@ export enum TerrainType {
 }
 
 export enum ObjectType {
-  NONE = 'NONE',
   PLAYER = 'PLAYER',
   BOX = 'BOX',
 
@@ -24,6 +23,7 @@ export interface TerrainTile {
 }
 
 export interface ObjectTile {
+  id: string;
   position: Position;
   type: ObjectType;
 }
@@ -36,6 +36,7 @@ export enum Direction {
 }
 
 export type MovedObject = {
+  id: string;
   type: ObjectType;
   initialPosition: Position;
   finalPosition: Position;

@@ -2,7 +2,6 @@ import React from 'react';
 import {
   TerrainTile,
   ObjectTile,
-  MovedObject,
   MoveRecord,
   Direction,
   Position,
@@ -24,31 +23,19 @@ interface BoardProps {
   skinIndex: number;
 }
 
-// Achata o array de MoveRecord em um array plano de MovedObject
-const flattenMovedObjects = (moveRecords: MoveRecord[] = []): MovedObject[] => {
-  return moveRecords.reduce<MovedObject[]>((acc, record) => {
-    if (record.movedObjects && record.movedObjects.length > 0) {
-      return acc.concat(record.movedObjects);
-    }
-    return acc;
-  }, []);
-};
-
-// Obtém a posição inicial para um tile, procurando por um registro cujo finalPosition
-// seja igual à posição atual do tile. Assim, o GameObject pode animar do initialPosition até a posição atual.
 const getInitialPositionForTile = (
   tile: ObjectTile,
   moveRecords: MoveRecord[] = []
 ): Position | undefined => {
-  const movedObjects = flattenMovedObjects(moveRecords);
-  const move = movedObjects.find(mov =>
-    mov.type === tile.type &&
-    mov.finalPosition.row === tile.position.row &&
-    mov.finalPosition.col === tile.position.col
-  );
-  return move ? { row: move.initialPosition.row, col: move.initialPosition.col } : undefined;
+  for (let i = moveRecords.length - 1; i >= 0; i--) {
+    const record = moveRecords[i];
+    if (record.movedObjects && record.movedObjects.length > 0) {
+      const move = record.movedObjects.find(mov => mov.id === tile.id);
+      if (move) return move.initialPosition;
+    }
+  }
+  return undefined;
 };
-
 
 const Board: React.FC<BoardProps> = ({
   terrain,
@@ -63,11 +50,14 @@ const Board: React.FC<BoardProps> = ({
     return <div className="board">Tabuleiro vazio ou inválido</div>;
   }
 
-  // Calcula as dimensões do tabuleiro a partir dos tiles de terreno
+  const minRow = Math.min(...terrain.map(tile => tile.position.row));
   const maxRow = Math.max(...terrain.map(tile => tile.position.row));
+  const minCol = Math.min(...terrain.map(tile => tile.position.col));
   const maxCol = Math.max(...terrain.map(tile => tile.position.col));
-
-  // Agrupa os tiles de terreno por linha, ordenando por coluna
+  
+  const boardWidth = (maxCol - minCol + 1) * CELL_SIZE;
+  const boardHeight = (maxRow - minRow + 1) * CELL_SIZE;
+  
   const terrainRows: TerrainTile[][] = [];
   for (let row = 0; row <= maxRow; row++) {
     terrainRows[row] = terrain
@@ -85,8 +75,8 @@ const Board: React.FC<BoardProps> = ({
       className="board"
       style={{
         position: 'relative',
-        width: (maxCol + 1) * CELL_SIZE,
-        height: (maxRow + 1) * CELL_SIZE,
+        width: boardWidth,
+        height: boardHeight,
       }}
     >
       {/* Camada 1: Terreno */}
@@ -126,9 +116,9 @@ const Board: React.FC<BoardProps> = ({
         </div>
       ))}
 
-      {/* Camada 2: Objetos (exceto NONE e PLAYER) */}
+      {/* Camada 2: Objetos (exceto PLAYER) */}
       {objects
-        .filter(obj => obj.type !== ObjectType.NONE && obj.type !== ObjectType.PLAYER)
+        .filter(obj => obj.type !== ObjectType.PLAYER)
         .map((obj) => {
           
           const initialPos = getInitialPositionForTile(obj, moveRecords);
@@ -136,8 +126,8 @@ const Board: React.FC<BoardProps> = ({
           return (
             <GameObject
               key={`gameobj-${obj.position.row}-${obj.position.col}`}
-              position={obj.position}   // posição final (deve ser igual ao finalPosition do registro)
-              initialPosition={initialPos} // se definido, dispara a animação
+              position={obj.position}
+              initialPosition={initialPos}
               cellSize={CELL_SIZE}
               objectType={obj}
               transitionDuration={240}

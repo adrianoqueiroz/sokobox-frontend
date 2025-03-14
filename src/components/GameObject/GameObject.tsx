@@ -4,46 +4,34 @@ import './GameObject.css'
 
 interface GameObjectProps {
   position: Position
-  initialPosition?: Position
   cellSize: number
   objectType: ObjectTile
+  initialPosition?: Position
   transitionDuration?: number
   onTransitionEnd?: () => void
 }
 
 const GameObject: React.FC<GameObjectProps> = ({
   position,
-  initialPosition,
   cellSize,
   objectType,
+  initialPosition,
   transitionDuration = 240,
   onTransitionEnd,
 }) => {
-  const startPos = initialPosition ? initialPosition : position;
-  const [style, setStyle] = useState({
-    top: startPos.row * cellSize,
-    left: startPos.col * cellSize,
-    transition: `top ${transitionDuration}ms ease, left ${transitionDuration}ms ease`
-  });
+  // Se initialPosition existir, inicia com ela; caso contrário, inicia na posição final.
+  const [currentPosition, setCurrentPosition] = useState<Position>(initialPosition || position);
 
   useEffect(() => {
-
     if (initialPosition) {
+      // Garante que a atualização ocorra no próximo frame, disparando a transição
       requestAnimationFrame(() => {
-        setStyle({
-          top: position.row * cellSize,
-          left: position.col * cellSize,
-          transition: `top ${transitionDuration}ms ease, left ${transitionDuration}ms ease`
-        });
+        setCurrentPosition(position);
       });
     }
-  }, [initialPosition, position, cellSize, transitionDuration]);
+  }, [initialPosition, position]);
 
-  const handleTransitionEnd = () => {
-    if (onTransitionEnd) {
-      onTransitionEnd();
-    }
-  };
+  const handleTransitionEnd = () => onTransitionEnd && onTransitionEnd();
 
   return (
     <div
@@ -52,7 +40,9 @@ const GameObject: React.FC<GameObjectProps> = ({
         position: 'absolute',
         width: cellSize,
         height: cellSize,
-        ...style,
+        top: `${currentPosition.row * cellSize}px`,
+        left: `${currentPosition.col * cellSize}px`,
+        transition: `top ${transitionDuration}ms ease-in-out, left ${transitionDuration}ms ease-in-out`,
       }}
       onTransitionEnd={handleTransitionEnd}
     />

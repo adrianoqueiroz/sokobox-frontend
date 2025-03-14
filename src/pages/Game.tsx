@@ -52,26 +52,30 @@ const Game: React.FC = () => {
         console.log("📡 Sessão carregada do backend:", sessionData);
   
         if (sessionData && sessionData.sessionId) {
-          console.log("✅ sessionId válido recebido:", sessionData.sessionId);
-          setCurrentSession(sessionData);
-          setCurrentObjects(sessionData.currentObjects);
-          setNameSelectedPhase(sessionData.phase.name);
-          setTimeElapsed(0);
-          setSessionStartTime(new Date(sessionData.updatedAt));
-          setCurrentMoveIndex(0);
-          setMovesCount(0);
-          setIsProcessing(false);
-          
-        } else {
-          console.log("⚠️ Nenhuma sessão encontrada, iniciando uma nova...");
-          const newSession = await handleStartSession();
-          console.log("📡 Nova sessão iniciada:", newSession);
-          if (newSession && newSession.sessionId) {
+          if (!currentSession.sessionId || currentSession.sessionId !== sessionData.sessionId) {
+            console.log("✅ Nova sessão recebida:", sessionData.sessionId);
             setCurrentSession(sessionData);
             setCurrentObjects(sessionData.currentObjects);
             setNameSelectedPhase(sessionData.phase.name);
             setTimeElapsed(0);
             setSessionStartTime(new Date(sessionData.updatedAt));
+            setCurrentMoveIndex(0);
+            setMovesCount(0);
+            setIsProcessing(false);
+          } else {
+            console.log("Sessão já carregada, sem alterações.");
+          }
+        } else {
+          // Lógica para iniciar uma nova sessão se nenhuma for encontrada
+          console.log("⚠️ Nenhuma sessão encontrada, iniciando uma nova...");
+          const newSession = await handleStartSession();
+          console.log("📡 Nova sessão iniciada:", newSession);
+          if (newSession && newSession.sessionId) {
+            setCurrentSession(newSession);
+            setCurrentObjects(newSession.currentObjects);
+            setNameSelectedPhase(newSession.phase.name);
+            setTimeElapsed(0);
+            setSessionStartTime(new Date(newSession.updatedAt));
             setCurrentMoveIndex(0);
             setMovesCount(0);
             setIsProcessing(false);
@@ -301,7 +305,6 @@ const Game: React.FC = () => {
       return {} as GameSessionResponse;
     }
   };
-
   
   const handlePhaseChange = async (newPhase: number) => {
 
