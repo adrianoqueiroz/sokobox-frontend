@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import { GameSession, BackendResponse } from '../types/GameTypes'; // ajuste o caminho conforme sua estrutura
+import { MoveResponse } from '../types/GameTypes'; 
 
 const WS_URL = import.meta.env.VITE_WS_URL;
 
 export const useWebSocket = () => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [gameState, setGameState] = useState<BackendResponse>(null);
+  const [gameState, setGameState] = useState<MoveResponse | undefined>();
 
   useEffect(() => {
     console.log('🔌 Tentando conectar ao WebSocket...');
@@ -19,11 +19,12 @@ export const useWebSocket = () => {
 
     ws.onmessage = (event) => {
       try {
-        const parsedData = JSON.parse(event.data);
-        console.log("Mensagem recebida do WS:", parsedData);
+        console.log("🔄 Dados recebidos brutos:", event.data);
+        const parsedData: MoveResponse = JSON.parse(event.data);
+        console.log("✅ Mensagem processada:", parsedData);
         setGameState(parsedData);
       } catch (error) {
-        console.error('Erro ao processar a mensagem do WebSocket:', error);
+        console.error('❌ Erro ao processar a mensagem do WebSocket:', error);
       }
     };
     
@@ -38,16 +39,18 @@ export const useWebSocket = () => {
   }, []);
 
   const sendMove = (
+    playerId: string,
     sessionId: string,
     direction: string, // se você tiver um enum para Direction, pode usar o tipo correspondente
     currentMoveIndex: number,
   ) => {
-    if (!socket) {
-      console.error('❌ WebSocket não está conectado!');
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      console.error('❌ WebSocket não está conectado ou ainda está abrindo!');
       return;
     }
 
-    const moveCommand = { sessionId, direction, currentMoveIndex };
+    const moveCommand = { playerId, sessionId, direction, currentMoveIndex };
+    console.log("🚀 Enviando movimento:", moveCommand);
     socket.send(JSON.stringify(moveCommand));
   };
 

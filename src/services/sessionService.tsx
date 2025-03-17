@@ -13,12 +13,12 @@ export const getLatestSession = async (): Promise<GameSessionResponse> => {
   }
 };
 
-export const startSession = async (phaseId?: string): Promise<GameSessionResponse> => {
+export const startSession = async (playerId: string, phaseId: string): Promise<GameSessionResponse> => {
   try {
     const response = await fetch(`${API_URL}/sessions/start`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(phaseId ? { phaseId } : {}),
+      body: JSON.stringify({ playerId, phaseId }),
     });
     if (!response.ok) throw new Error('Erro ao iniciar sessão');
     return await response.json() as GameSessionResponse;
@@ -56,7 +56,7 @@ export const changePhase = async (sessionId: string, phaseId: string, playerId: 
 
 export const getPhasesSequence = async (): Promise<string[]> => {
   try {
-    const response = await fetch(`${API_URL}/phases/sequence`, {
+    const response = await fetch(`${API_URL}/phases-sequence`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });

@@ -8,8 +8,8 @@ interface ZoomableBoardProps {
   terrain: TerrainTile[];
   objects: ObjectTile[];
   moveRecords: MoveRecord[];
-  playerDirection: Direction;
-  playerPosition: Position;
+  playerId: string;
+  playerDirection: Direction
   skinIndex: number;
 }
 

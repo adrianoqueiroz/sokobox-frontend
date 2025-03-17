@@ -53,7 +53,7 @@ export interface MoveErrorResponse {
 }
 
 export interface GameSessionResponse {
-  sessionId: string;
+  id: string;
   playerId: string;
   playerStrength: number;
   phase: PhaseType; 

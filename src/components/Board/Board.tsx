@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   TerrainTile,
   ObjectTile,
   MoveRecord,
+  MovedObject,
   Direction,
   Position,
   TerrainType,
@@ -18,9 +19,9 @@ interface BoardProps {
   terrain: TerrainTile[];
   objects: ObjectTile[];
   moveRecords: MoveRecord[];
-  playerDirection: Direction;
-  playerPosition: Position;
   skinIndex: number;
+  playerId: string;
+  playerDirection: Direction;
 }
 
 const getInitialPositionForTile = (
@@ -37,13 +38,28 @@ const getInitialPositionForTile = (
   return undefined;
 };
 
+
+const getMovementForTile = (
+  tile: ObjectTile,
+  moveRecords: MoveRecord[] = []
+): MovedObject | undefined => {
+  for (let i = moveRecords.length - 1; i >= 0; i--) {
+    const record = moveRecords[i];
+    if (record.movedObjects && record.movedObjects.length > 0) {
+      const move = record.movedObjects.find(mov => mov.id === tile.id);
+      if (move) return move;
+    }
+  }
+  return undefined;
+};
+
 const Board: React.FC<BoardProps> = ({
   terrain,
   objects,
   moveRecords,
-  playerDirection,
-  playerPosition,
   skinIndex,
+  playerId,
+  playerDirection
 }) => {
  
   if (!terrain || terrain.length === 0) {
@@ -64,6 +80,24 @@ const Board: React.FC<BoardProps> = ({
       .filter(tile => tile.position.row === row)
       .sort((a, b) => a.position.col - b.position.col);
   }
+
+  const playerPosition: Position = useMemo(() => {
+    const players = objects.filter(obj => obj.type === ObjectType.PLAYER);
+    console.log("👀 Objetos do tipo PLAYER encontrados:", players);
+  
+    const found = players.find(obj => obj.id === playerId);
+    console.log("📌 Player encontrado?", found);
+  
+    return found ? found.position : { row: 0, col: 0 };
+  }, [objects, playerId]);
+  
+  const playerMovement = useMemo(() => {
+    return getMovementForTile(
+      { id: playerId, position: playerPosition, type: ObjectType.PLAYER },
+      moveRecords
+    );
+  }, [playerId, playerPosition, moveRecords]);
+
 
   React.useEffect(() => {
     console.log("moveRecords atualizados:", moveRecords);

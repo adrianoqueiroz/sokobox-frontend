@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import Sidebar from '../components/Sidebar/Sidebar';
-import { getLatestSession, startSession, restartSession, getPhasesSequence, changePhase } from '../services/sessionService';
+import { getLatestSession, startSession, restartSession, getPhasesSequence } from '../services/sessionService';
 import {
   GameSessionResponse,
   MoveResponse,
@@ -9,7 +9,6 @@ import {
   MovedObject,
   MoveRecord,
   Direction,
-  Position,
   ObjectType
 } from '../types/GameTypes';
 import { useWebSocket } from '../hooks/useWebSocket';
@@ -18,94 +17,136 @@ import './Game.css';
 
 const Game: React.FC = () => {
   const [currentSession, setCurrentSession] = useState<GameSessionResponse>({} as GameSessionResponse);
-
   const [currentObjects, setCurrentObjects] = useState<ObjectTile[]>([]);
   const [moveRecords, setMoveRecords] = useState<MoveRecord[]>([]);
+
   const [moveQueue, setMoveQueue] = useState<Direction[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [movesCount, setMovesCount] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
-
   const [phases, setPhases] = useState<{ id: string; name: string }[]>([]);
-  const [phaseIndex, setPhaseIndex] = useState(0);
   const [nameSelectedPhase, setNameSelectedPhase] = useState<string | null>(null);
-  
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [playerDirection, setPlayerDirection] = useState<Direction>(Direction.DOWN);
   const [skinIndex, setSkinIndex] = useState(0);
+  
+  
+  
+  const [selectedPlayerid, setSelectedPlayerId] = useState("");
+  const [selectedPhaseId, setselectedPhaseId] = useState("");
 
   const { gameState, sendMove: sendMoveWS } = useWebSocket();
 
   useEffect(() => {
-    console.log("🛠️ currentSession atualizado:", currentSession);
-  }, [currentSession]);
+    console.log("🔧 Definindo Player ID e Phase ID...");
+    setSelectedPlayerId("d9b0c494-4aa9-4c74-947d-8e2467616dd1");
+    setselectedPhaseId("1052ca0b-df02-4124-82f3-a21208bf067b");
+  }, []);
 
   useEffect(() => {
-    console.log("🔄 Inicializando o jogo...");
-    console.log("📡 Estado atual da sessão antes da inicialização:", currentSession);
-  
-    const initializeGame = async () => {
-      try {
-        const sessionData = await getLatestSession();
-        console.log("📡 Sessão carregada do backend:", sessionData);
-  
-        if (sessionData && sessionData.sessionId) {
-          if (!currentSession.sessionId || currentSession.sessionId !== sessionData.sessionId) {
-            console.log("✅ Nova sessão recebida:", sessionData.sessionId);
-            setCurrentSession(sessionData);
-            setCurrentObjects(sessionData.currentObjects);
-            setNameSelectedPhase(sessionData.phase.name);
-            setTimeElapsed(0);
-            setSessionStartTime(new Date(sessionData.updatedAt));
-            setCurrentMoveIndex(0);
-            setMovesCount(0);
-            setIsProcessing(false);
-          } else {
-            console.log("Sessão já carregada, sem alterações.");
-          }
-        } else {
-          // Lógica para iniciar uma nova sessão se nenhuma for encontrada
-          console.log("⚠️ Nenhuma sessão encontrada, iniciando uma nova...");
-          const newSession = await handleStartSession();
-          console.log("📡 Nova sessão iniciada:", newSession);
-          if (newSession && newSession.sessionId) {
-            setCurrentSession(newSession);
-            setCurrentObjects(newSession.currentObjects);
-            setNameSelectedPhase(newSession.phase.name);
-            setTimeElapsed(0);
-            setSessionStartTime(new Date(newSession.updatedAt));
-            setCurrentMoveIndex(0);
-            setMovesCount(0);
-            setIsProcessing(false);
-          }
-        }
-      } catch (error) {
-        console.error('❌ Erro ao carregar sessão:', error);
-      } finally {
-        setIsLoading(false);
-        console.log("✅ Inicialização concluída.");
-      }
-    };
-  
     initializeGame();
-  }, []); 
+  }, [selectedPlayerid, selectedPhaseId]);
 
+  //inicializa o game após carregar o playerId e phaseId
+  const initializeGame = async () => {
+    if (!selectedPlayerid || !selectedPhaseId) {
+      console.log("⏳ Aguardando playerId e phaseId serem definidos...");
+      return;
+    }
+  
+    try {
+      console.log("🔄 Tentando recuperar a sessão existente...");
+      let session = await getLatestSession();
+  
+      if (!session || !session.id) {
+        console.log("⚠️ Nenhuma sessão encontrada, iniciando uma nova...");
+        session = await handleStartSession();
+      }
+  
+      if (session && session.id) {
+        console.log("✅ Sessão carregada:", session);
+        setCurrentSession(session);
+        setCurrentObjects(session.currentObjects);
+        setMoveRecords(session.moveRecords);
+        setNameSelectedPhase(session.phase.name);
+        setTimeElapsed(0);
+        setSessionStartTime(new Date(session.updatedAt));
+        setCurrentMoveIndex(0);
+        setMovesCount(0);
+        setIsProcessing(false);
+      } else {
+        console.error("❌ Erro: Nenhuma sessão válida foi carregada.");
+      }
+    } catch (error) {
+      console.error("❌ Erro ao carregar sessão:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStartSession = async (): Promise<GameSessionResponse> => {
+    if (!selectedPlayerid || !selectedPhaseId) {
+      console.error("❌ Erro: `selectedPlayerid` ou `selectedPhaseId` não definidos.");
+      return {} as GameSessionResponse;
+    }
+  
+    try {
+      console.log("📡 Enviando requisição para iniciar sessão:", {
+        playerId: selectedPlayerid,
+        phaseId: selectedPhaseId,
+      });
+  
+      const newSession = await startSession(selectedPlayerid, selectedPhaseId);
+      if (newSession && newSession.id) {
+        setCurrentSession(newSession);
+        return newSession;
+      } else {
+        console.error("❌ Erro: newSession não contém um sessionId válido.");
+        return {} as GameSessionResponse;
+      }
+    } catch (error) {
+      console.error("❌ Erro ao iniciar sessão:", error);
+      return {} as GameSessionResponse;
+    }
+  };
+
+  const handleRestart = async () => {
+    if (!currentSession || !currentSession.id) return;
+  
+    try {
+      const sessionData = await restartSession(currentSession.id);
+      if (sessionData) {
+        setCurrentSession(sessionData);
+        setCurrentObjects(sessionData.currentObjects);
+        setNameSelectedPhase(sessionData.phase.name);
+        setTimeElapsed(0);
+        setSessionStartTime(new Date(sessionData.updatedAt));
+        setCurrentMoveIndex(0);
+        setMovesCount(0);
+        setIsProcessing(false);
+      }
+    } catch (error) {
+      console.error('Erro ao reiniciar a sessão:', error);
+    }
+  };
+
+  //timer da sidebar
   useEffect(() => {
     if (!sessionStartTime) return;
     
-    const updateTime = () => {
+    const interval = setInterval(() => {
       const now = new Date();
       setTimeElapsed(Math.floor((now.getTime() - sessionStartTime.getTime()) / 1000));
-    };
-
-    const interval = setInterval(updateTime, 1000);
+    }, 1000);
+    
     return () => clearInterval(interval);
   }, [sessionStartTime]);
 
+  //handle key down
   useEffect(() => {
-    if (!currentSession || !currentSession.sessionId) return;
+    if (!currentSession || !currentSession.id) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (isProcessing) return;
@@ -126,248 +167,112 @@ const Game: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [currentSession, isProcessing]);
 
+  //handle swipe
   const handleSwipe = useCallback((direction: Direction) => {
-    if (!currentSession || !currentSession.sessionId) return;
-
+    if (!currentSession || !currentSession.id) return;
     console.log("🕹️ Swipe detectado:", direction);
     setMoveQueue((prevQueue) => [...prevQueue, direction]);
   }, [currentSession]);
 
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => handleSwipe(Direction.LEFT),
-    onSwipedRight: () => handleSwipe(Direction.RIGHT),
-    onSwipedUp: () => handleSwipe(Direction.UP),
-    onSwipedDown: () => handleSwipe(Direction.DOWN),
-    preventScrollOnSwipe: true,
-    trackMouse: true,
-    delta: 10,
+// Enviar o movimento apenas se não estiver processando
+useEffect(() => {
+  if (!currentSession || moveQueue.length === 0 || isProcessing) return;
+
+  setIsProcessing(true);
+  const move = moveQueue[0];
+
+  console.log("📡 Enviando movimento para WebSocket:", {
+    sessionId: currentSession.id,
+    playerId: selectedPlayerid,
+    move,
+    currentMoveIndex,
   });
 
-  const playerPosition: Position = useMemo(() => {
-    const found = currentObjects.find((obj) => obj.type === ObjectType.PLAYER);
-    return found ? found.position : { row: 0, col: 0 };
-  }, [currentObjects]);
+  sendMoveWS(selectedPlayerid, currentSession.id, move, currentMoveIndex);
+}, [currentSession, moveQueue, isProcessing, sendMoveWS, currentMoveIndex]);
 
-  const handleRestart = async () => {
-    if (!currentSession || !currentSession.sessionId) return;
-    try {
-      const sessionData = await restartSession(currentSession.sessionId);
-      if (sessionData) {
-        setCurrentSession(sessionData);
-        setCurrentObjects(sessionData.currentObjects);
-        setNameSelectedPhase(sessionData.phase.name);
-        setTimeElapsed(0);
-        setSessionStartTime(new Date(sessionData.updatedAt));
-        setCurrentMoveIndex(0);
-        setMovesCount(0);
-        setIsProcessing(false);
-      }
-    } catch (error) {
-      console.error('Erro ao reiniciar a sessão:', error);
-    }
-  };
+// Escutar a resposta do WebSocket para processar o próximo movimento
+useEffect(() => {
+  if (!gameState) return;
 
-  useEffect(() => {
-    if (!currentSession || moveQueue.length === 0 || isProcessing) return;
+  console.log("📡 Resposta recebida do WebSocket:", gameState);
 
-    setIsProcessing(true);
-    const move = moveQueue[0];
+  if ('error' in gameState && gameState.error) {
+    console.error("❌ Erro do backend:", gameState);
 
-    console.log("📡 Enviando movimento para WebSocket:", {
-      sessionId: currentSession.sessionId,
-      move,
-      currentMoveIndex,
-    });
-
-    sendMoveWS(currentSession.sessionId, move, currentMoveIndex);
+    // Removemos o movimento problemático da fila
     setMoveQueue((prevQueue) => prevQueue.slice(1));
-  }, [currentSession, moveQueue, isProcessing, sendMoveWS, currentMoveIndex]);
 
-  useEffect(() => {
-    if (gameState) {
-      console.log("📡 Resposta recebida do WebSocket:", gameState);
-  
-      if ('error' in gameState && gameState.error) {
-        console.error("Erro do backend:", gameState.message);
-        setIsProcessing(false);
-        return;
-      }
-  
-      const moveResponse: MoveResponse = gameState;
-  
-      if (moveResponse.objects && moveResponse.terrain) {
-        console.log("🔄 Atualizando currentObjects e terrain após movimento...");
-        setCurrentObjects([...moveResponse.objects]); 
-        setCurrentSession((prevSession) => ({
-          ...prevSession,
-          currentObjects: moveResponse.objects, 
-          moveRecords: moveResponse.moveRecords,
-          completed: moveResponse.completed,
-        }));
-      } else {
-        console.error("❌ Erro: MoveResponse não retornou objetos ou terreno atualizados.");
-      }
-  
-      const lastMove = moveResponse.moveRecords.length > 0 
-        ? moveResponse.moveRecords[moveResponse.moveRecords.length - 1] 
-        : undefined;
-  
-      if (lastMove?.movedObjects) {
-        const playerMove = lastMove.movedObjects.find(
-          (obj: MovedObject) => obj.type === ObjectType.PLAYER
-        );
-        if (playerMove) {  
-          setPlayerDirection(lastMove.direction);
-        }
-        setMoveRecords([...moveResponse.moveRecords]);
-        setCurrentMoveIndex(moveResponse.moveRecords.length);
-  
-        setTimeout(() => {
-          setIsProcessing(false);
-        }, 220);
-      } else {
-        setIsProcessing(false);
-      }
-      console.log("moveRecords atualizados:", moveResponse.moveRecords);
+    // Liberamos o processamento para aceitar novos movimentos
+    setIsProcessing(false);
+    return;
+  }
+
+  const moveResponse: MoveResponse = gameState;
+
+  if (moveResponse.objects && moveResponse.terrain) {
+    setCurrentObjects([...moveResponse.objects]); 
+    setCurrentSession((prevSession) => ({
+      ...prevSession,
+      currentObjects: moveResponse.objects, 
+      moveRecords: moveResponse.moveRecords,
+      completed: moveResponse.completed,
+    }));
+  }
+
+  const lastMove = moveResponse.moveRecords.length > 0 
+    ? moveResponse.moveRecords[moveResponse.moveRecords.length - 1] 
+    : undefined;
+
+  if (lastMove?.movedObjects) {
+    const playerMove = lastMove.movedObjects.find(
+      (obj: MovedObject) => obj.type === ObjectType.PLAYER
+    );
+    if (playerMove) {  
+      setPlayerDirection(lastMove.direction);
     }
-  }, [gameState]);
+    setMoveRecords([...moveResponse.moveRecords]);
+    setCurrentMoveIndex(moveResponse.moveRecords.length);
+  }
 
-  
-  useEffect(() => {
-    console.log("🔍 Buscando sequência de fases...");
-    const fetchPhasesSequence = async () => {
-      try {
-        const sequenceResponse = await getPhasesSequence();
-        console.log("📋 Fases carregadas:", sequenceResponse);
-        
-        if (sequenceResponse.length > 0) {
-          setPhases(sequenceResponse.map(id => ({ id, name: `Fase ${id}` })));
-          setPhaseIndex(0);
-        }
-      } catch (error) {
-        console.error('❌ Erro ao buscar sequência de fases:', error);
-      }
-    };
-
-    fetchPhasesSequence();
-  }, []);
-  
-  useEffect(() => {
-    if (phases.length === 0 || phaseIndex < 0 || phaseIndex >= phases.length) return;
-  
-    console.log(`🔄 Trocando para a fase ${phases[phaseIndex].id}`);
- 
-    const fetchSelectedPhase = async () => {
-      try {
-        const phaseId = phases[phaseIndex].id;
-        console.log(`📡 Enviando request para trocar para a fase ${phaseId}...`);
-  
-        const newSession = await changePhase(currentSession.sessionId, phaseId, currentSession.playerId);
-        console.log("✅ Nova sessão recebida após troca de fase:", newSession);
-  
-        if (!newSession) {
-          console.error('❌ Erro: newSession está null');
-          return;
-        }
-  
-        setMoveRecords([]);
-        setMoveQueue([]);
-        setMovesCount(0);
-        setCurrentMoveIndex(0);
-        setIsProcessing(false);
-        setTimeElapsed(0);
-        setSessionStartTime(new Date());
-        setCurrentSession(newSession);
-
-      } catch (error) {
-        console.error('❌ Erro ao trocar de fase:', error);
-      }
-    };
-  
-    if (currentSession.sessionId) {
-      fetchSelectedPhase();
-    }
-  }, [phaseIndex, phases, currentSession.sessionId]); 
-
-  
-  const handleStartSession = async (phaseId?: string): Promise<GameSessionResponse> => {
-    try {
-      const newSession = await startSession(phaseId);
-      if (newSession && newSession.sessionId) {
-        setCurrentSession(newSession);
-        return newSession;
-      } else {
-        console.error("❌ Erro: newSession não contém um sessionId válido.");
-        return {} as GameSessionResponse;
-      }
-    } catch (error) {
-      console.error("❌ Erro ao iniciar sessão:", error);
-      return {} as GameSessionResponse;
-    }
-  };
-  
-  const handlePhaseChange = async (newPhase: number) => {
-
-    try {
-      const newSession = await changePhase(currentSession.sessionId, phases[newPhase].id, currentSession.playerId);
-      
-      if (newSession && newSession.sessionId) {
-        setMoveRecords([]);
-        setMoveQueue([]);
-        setMovesCount(0);
-        setCurrentMoveIndex(0);
-        setIsProcessing(false);
-        setTimeElapsed(0);
-        setSessionStartTime(new Date());
-        setCurrentSession(newSession);
-      } else {
-        console.error("❌ Erro: newSession não contém um sessionId válido.");
-      }
-    } catch (error) {
-      console.error('Erro ao mudar fase:', error);
-    }
-  };
-
-  const handleMoveChange = (newMove: number) => {
-    if (newMove >= 0 && newMove <= movesCount) {
-      setCurrentMoveIndex(newMove);
-    }
-  };
-
-  const handleSkinChange = (newSkinIndex: number) => {
-    if (newSkinIndex >= 0 && newSkinIndex < 8) {
-      setSkinIndex(newSkinIndex);
-    }
-  };
+  // Agora removemos o movimento processado e liberamos o processamento
+  setMoveQueue((prevQueue) => prevQueue.slice(1));
+  setIsProcessing(false);
+}, [gameState]);
 
   return (
-    <div className="game-wrapper" {...swipeHandlers}>
+    <div className="game-wrapper">
       <div className="game-container">
-        {isLoading ? <p>Carregando...</p> :
-         <ZoomableBoard 
-         terrain={currentSession.phase.terrain} 
-         objects={currentObjects} 
-         moveRecords={moveRecords} 
-         playerDirection={playerDirection} 
-         playerPosition={playerPosition}
-         skinIndex={skinIndex}
-         onSwipe={handleSwipe} 
-       />}
+        {isLoading ? (
+          <p>Carregando...</p>
+        ) : !currentSession || !currentSession.phase ? (
+          <p>⚠️ Sessão não encontrada. Tente reiniciar.</p>
+        ) : (
+          <ZoomableBoard
+            terrain={currentSession.phase.terrain} // ⬅️ Evita erro ao acessar `terrain`
+            objects={currentObjects} // ⬅️ Evita erro ao acessar `currentObjects`
+            moveRecords={currentSession.moveRecords}
+            playerId={selectedPlayerid}
+            playerDirection={playerDirection}
+            skinIndex={skinIndex}
+            onSwipe={handleSwipe}
+          />
+        )}
       </div>
-
+      
       <Sidebar
         timeElapsed={timeElapsed}
         phaseName={nameSelectedPhase || "Fase Desconhecida"}
-        phaseNumber={phaseIndex + 1}
+        phaseNumber={1}
         skinIndex={skinIndex}
         maxSkins={7}
-        maxPhases={phases.length}
+        maxPhases={1}
         maxMoves={movesCount}
         moveHistoryIndex={currentMoveIndex}
-        onSkinChange={handleSkinChange}
-        onPhaseChange={handlePhaseChange}
-        onMoveChange={handleMoveChange}
+        onSkinChange={setSkinIndex}
+        onMoveChange={setCurrentMoveIndex}
         onRestart={handleRestart}
+        onPhaseChange={() => {}} // Temporário
       />
     </div>
   );
