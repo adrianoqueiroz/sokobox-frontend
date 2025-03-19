@@ -20,8 +20,6 @@ interface BoardProps {
   objects: ObjectTile[];
   moveRecords: MoveRecord[];
   skinIndex: number;
-  playerId: string;
-  playerDirection: Direction;
 }
 
 const getInitialPositionForTile = (
@@ -38,28 +36,11 @@ const getInitialPositionForTile = (
   return undefined;
 };
 
-
-const getMovementForTile = (
-  tile: ObjectTile,
-  moveRecords: MoveRecord[] = []
-): MovedObject | undefined => {
-  for (let i = moveRecords.length - 1; i >= 0; i--) {
-    const record = moveRecords[i];
-    if (record.movedObjects && record.movedObjects.length > 0) {
-      const move = record.movedObjects.find(mov => mov.id === tile.id);
-      if (move) return move;
-    }
-  }
-  return undefined;
-};
-
 const Board: React.FC<BoardProps> = ({
   terrain,
   objects,
   moveRecords,
-  skinIndex,
-  playerId,
-  playerDirection
+  skinIndex
 }) => {
  
   if (!terrain || terrain.length === 0) {
@@ -80,25 +61,7 @@ const Board: React.FC<BoardProps> = ({
       .filter(tile => tile.position.row === row)
       .sort((a, b) => a.position.col - b.position.col);
   }
-
-  const playerPosition: Position = useMemo(() => {
-    const players = objects.filter(obj => obj.type === ObjectType.PLAYER);
-    console.log("👀 Objetos do tipo PLAYER encontrados:", players);
   
-    const found = players.find(obj => obj.id === playerId);
-    console.log("📌 Player encontrado?", found);
-  
-    return found ? found.position : { row: 0, col: 0 };
-  }, [objects, playerId]);
-  
-  const playerMovement = useMemo(() => {
-    return getMovementForTile(
-      { id: playerId, position: playerPosition, type: ObjectType.PLAYER },
-      moveRecords
-    );
-  }, [playerId, playerPosition, moveRecords]);
-
-
   React.useEffect(() => {
     console.log("moveRecords atualizados:", moveRecords);
   }, [moveRecords]);
@@ -170,13 +133,31 @@ const Board: React.FC<BoardProps> = ({
         })
       }
 
-      {/* Camada 3: Player */}
-      <Player 
-        position={playerPosition} 
-        direction={playerDirection} 
-        cellSize={CELL_SIZE} 
-        skinIndex={skinIndex}
-      />
+      {/* Camada 3: Players */}
+      {objects
+        .filter(obj => obj.type === ObjectType.PLAYER)
+        .map((player) => {
+          let direction = Direction.DOWN; // Valor padrão
+          for (let i = moveRecords.length - 1; i >= 0; i--) {
+            const record = moveRecords[i];
+            const playerMovedObject = record.movedObjects.find(movedObj => movedObj.id === player.id);
+            if (playerMovedObject) {
+              direction = record.direction;
+              break; // Encontrou o moveRecord mais recente, pode parar
+            }
+          }
+          
+          return (
+            <Player 
+              key={`player-${player.id}`}
+              position={player.position} 
+              direction={direction}
+              cellSize={CELL_SIZE} 
+              skinIndex={skinIndex}
+            />
+          );
+        })
+      }
     </div>
   );
 };

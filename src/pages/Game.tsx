@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSwipeable } from 'react-swipeable';
+import { v4 as uuidv4 } from 'uuid';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { getLatestSession, startSession, restartSession, getPhasesSequence } from '../services/sessionService';
 import {
@@ -32,17 +33,24 @@ const Game: React.FC = () => {
   const [playerDirection, setPlayerDirection] = useState<Direction>(Direction.DOWN);
   const [skinIndex, setSkinIndex] = useState(0);
   
-  
-  
   const [selectedPlayerid, setSelectedPlayerId] = useState("");
   const [selectedPhaseId, setselectedPhaseId] = useState("");
 
-  const { gameState, sendMove: sendMoveWS } = useWebSocket();
+  const { gameState, sendMove: sendMoveWS } = useWebSocket(selectedPlayerid, currentSession.id);
 
   useEffect(() => {
-    console.log("🔧 Definindo Player ID e Phase ID...");
-    setSelectedPlayerId("d9b0c494-4aa9-4c74-947d-8e2467616dd1");
-    setselectedPhaseId("1052ca0b-df02-4124-82f3-a21208bf067b");
+    const storedPlayerId = localStorage.getItem('playerId');
+    const storedPhaseId = localStorage.getItem('phaseId');
+
+    if (storedPlayerId && storedPhaseId) {
+      setSelectedPlayerId(storedPlayerId);
+      setselectedPhaseId(storedPhaseId);
+    } else {
+      setSelectedPlayerId(uuidv4());
+      setselectedPhaseId("1052ca0b-df02-4124-82f3-a21208bf067b");
+      localStorage.setItem('playerId', selectedPlayerid);
+      localStorage.setItem('phaseId', selectedPhaseId);
+    }
   }, []);
 
   useEffect(() => {
@@ -188,7 +196,7 @@ useEffect(() => {
     currentMoveIndex,
   });
 
-  sendMoveWS(selectedPlayerid, currentSession.id, move, currentMoveIndex);
+  sendMoveWS(move, currentMoveIndex);
 }, [currentSession, moveQueue, isProcessing, sendMoveWS, currentMoveIndex]);
 
 // Escutar a resposta do WebSocket para processar o próximo movimento
